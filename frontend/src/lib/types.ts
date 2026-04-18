@@ -1,6 +1,12 @@
 export type UserRole = "admin" | "customer";
 
-export type ShipmentStatus = "pending" | "in_transit" | "delivered" | "failed";
+export type ShipmentStatus =
+  | "pending"
+  | "in_transit"
+  | "delivered"
+  | "failed"
+  | "label_created"
+  | "cancelled";
 
 export type User = {
   id: number;
@@ -42,11 +48,26 @@ export type Shipment = {
   id: number;
   user_id: number;
   tracking_number: string;
+  fedex_tracking_number?: string | null;
   sender_details: AddressDetails;
   receiver_details: AddressDetails;
   package_details: PackageDetails;
   status: ShipmentStatus;
   label_url: string | null;
+  label_path?: string | null;
+  service_type?: string | null;
+  pickup_type?: string | null;
+  package_weight?: number | null;
+  package_dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+    units: "IN" | "CM";
+  } | null;
+  is_residential?: boolean;
+  fedex_transaction_id?: string | null;
+  fedex_job_id?: string | null;
+  shipped_at?: string | null;
   fedex_response: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -65,9 +86,9 @@ export type UpdateUserInput = Partial<Omit<CreateUserInput, "password">> & {
   password?: string;
 };
 
-export type CreateShipmentInput = {
-  /** Ignored for customer API (owner is authenticated user). */
-  user_id?: number;
+/** Admin create: `POST /api/admin/shipments` (FedEx Ship when configured) */
+export type CreateAdminShipmentInput = {
+  user_id: number;
   sender_details: AddressDetails;
   receiver_details: AddressDetails;
   package_details: PackageDetails;

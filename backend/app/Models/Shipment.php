@@ -11,12 +11,22 @@ class Shipment extends Model
     protected $fillable = [
         'user_id',
         'tracking_number',
+        'fedex_tracking_number',
         'sender_details',
         'receiver_details',
         'package_details',
         'status',
         'label_url',
+        'label_path',
+        'service_type',
+        'pickup_type',
+        'package_weight',
+        'package_dimensions',
+        'is_residential',
         'fedex_response',
+        'fedex_transaction_id',
+        'fedex_job_id',
+        'shipped_at',
     ];
 
     protected function casts(): array
@@ -26,6 +36,10 @@ class Shipment extends Model
             'receiver_details' => 'array',
             'package_details' => 'array',
             'fedex_response' => 'array',
+            'package_dimensions' => 'array',
+            'is_residential' => 'boolean',
+            'package_weight' => 'decimal:2',
+            'shipped_at' => 'datetime',
         ];
     }
 

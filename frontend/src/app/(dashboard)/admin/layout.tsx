@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AppShell } from "@/components/shipping/app-shell";
+import { LoadingScreen } from "@/components/shipping/loading-screen";
 import { useAuth } from "@/lib/auth/context";
 
 export default function AdminLayout({
@@ -21,32 +21,12 @@ export default function AdminLayout({
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Checking access…
-      </div>
-    );
+    return <LoadingScreen message="Checking access…" />;
   }
 
   if (user.role !== "admin") {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Redirecting…
-      </div>
-    );
+    return <LoadingScreen message="Redirecting…" />;
   }
 
-  return (
-    <AppShell
-      title="Admin"
-      badge="API"
-      nav={[
-        { href: "/admin", label: "Overview" },
-        { href: "/admin/users", label: "Users" },
-        { href: "/admin/shipments", label: "All shipments" },
-      ]}
-    >
-      {children}
-    </AppShell>
-  );
+  return <>{children}</>;
 }

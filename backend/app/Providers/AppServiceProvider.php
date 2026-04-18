@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Contracts\FedEx\FedExClient;
+use App\Services\FedEx\FedExOAuthToken;
+use App\Services\FedEx\FedExShipmentCreateService;
 use App\Services\FedEx\RestFedExClient;
 use App\Services\FedEx\StubFedExClient;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -18,10 +20,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(FedExClient::class, function () {
-            if (config('fedex.mode') === 'rest'
-                && filled(config('fedex.client_id'))
-                && filled(config('fedex.client_secret'))) {
-                return new RestFedExClient(new StubFedExClient);
+            if (config('fedex.mode') === 'rest' && FedExShipmentCreateService::isConfigured()) {
+                return new RestFedExClient($this->app->make(FedExOAuthToken::class));
             }
 
             return new StubFedExClient;

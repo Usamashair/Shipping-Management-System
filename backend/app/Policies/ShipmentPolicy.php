@@ -31,4 +31,14 @@ class ShipmentPolicy
     {
         return $user->isAdmin();
     }
+
+    public function cancel(User $user, Shipment $shipment): bool
+    {
+        return $user->isAdmin();
+    }
+
+    public function downloadLabel(User $user, Shipment $shipment): bool
+    {
+        return $user->isAdmin() || $shipment->user_id === $user->id;
+    }
 }

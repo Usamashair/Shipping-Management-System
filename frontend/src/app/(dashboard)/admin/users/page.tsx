@@ -1,220 +1,128 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Pencil, PlusCircle } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useMemo } from "react";
 import { DataTable } from "@/components/shipping/data-table";
+import { Button } from "@/components/ui/button";
 import { useApiStore } from "@/lib/api/store";
-import type { CreateUserInput, UpdateUserInput, UserRole } from "@/lib/types";
+
+function avatarColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  const hue = Math.abs(h) % 360;
+  return `hsl(${hue} 55% 42%)`;
+}
+
+function initials(name: string): string {
+  const p = name.trim().split(/\s+/).filter(Boolean);
+  if (p.length === 0) return "?";
+  if (p.length === 1) return p[0].slice(0, 2).toUpperCase();
+  return (p[0][0] + p[p.length - 1][0]).toUpperCase();
+}
 
 export default function AdminUsersPage() {
-  const { listUsers, refreshUsers, createUser, updateUser, deleteUser } = useApiStore();
+  const { listUsers, refreshUsers, listShipments, refreshShipments } = useApiStore();
   const users = listUsers();
-  const [openCreate, setOpenCreate] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
+  const shipments = listShipments({ scope: "all" });
 
   useEffect(() => {
     void refreshUsers();
-  }, [refreshUsers]);
+    void refreshShipments("all");
+  }, [refreshUsers, refreshShipments]);
 
-  const sorted = useMemo(
-    () => [...users].sort((a, b) => a.id - b.id),
-    [users],
-  );
+  const counts = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const s of shipments) {
+      m.set(s.user_id, (m.get(s.user_id) ?? 0) + 1);
+    }
+    return m;
+  }, [shipments]);
+
+  const sorted = useMemo(() => [...users].sort((a, b) => a.id - b.id), [users]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">Users</h2>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Create, update, or delete users via the Laravel API (admin only).
-          </p>
+    <div className="space-y-8">
+      <header className="border-b border-border-default pb-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-muted">Directory</p>
+            <h1
+              className="mt-2 text-2xl font-bold tracking-tight text-text-primary md:text-3xl"
+              style={{ fontFamily: "var(--font-syne), sans-serif" }}
+            >
+              Users
+            </h1>
+            <p className="mt-2 text-sm text-text-secondary">Manage accounts and roles</p>
+          </div>
+          <Link href="/admin/users/new">
+            <Button className="inline-flex items-center gap-2">
+              <PlusCircle className="h-4 w-4" />
+              Add user
+            </Button>
+          </Link>
         </div>
-        <button
-          type="button"
-          onClick={() => setOpenCreate(true)}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          Add user
-        </button>
-      </div>
+      </header>
 
       <DataTable
         columns={[
-          { key: "id", label: "ID", className: "w-14" },
+          { key: "avatar", label: "", className: "w-14" },
           { key: "name", label: "Name" },
           { key: "email", label: "Email" },
-          { key: "role", label: "Role", className: "w-28" },
-          { key: "actions", label: "", className: "w-40 text-right" },
+          { key: "role", label: "Role", className: "w-32" },
+          { key: "ship", label: "Shipments", className: "w-28 tabular-nums" },
+          { key: "joined", label: "Joined", className: "w-28" },
+          { key: "actions", label: "Actions", className: "w-24 text-right" },
         ]}
+        pageSize={15}
         emptyMessage="No users yet."
       >
         {sorted.map((u) => (
           <tr key={u.id}>
-            <td className="px-4 py-3 font-mono text-xs text-zinc-500">{u.id}</td>
-            <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">{u.name}</td>
-            <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{u.email}</td>
-            <td className="px-4 py-3 capitalize text-zinc-700 dark:text-zinc-300">{u.role}</td>
+            <td className="px-4 py-3">
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: avatarColor(u.name) }}
+              >
+                {initials(u.name)}
+              </div>
+            </td>
+            <td className="px-4 py-3">
+              <Link
+                href={`/admin/users/${u.id}`}
+                className="font-medium text-text-primary hover:text-accent-amber"
+              >
+                {u.name}
+              </Link>
+            </td>
+            <td className="mono px-4 py-3 text-sm text-text-secondary tabular-nums">{u.email}</td>
+            <td className="px-4 py-3">
+              <span
+                className={`inline-flex rounded px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+                  u.role === "admin"
+                    ? "bg-[var(--accent-amber-glow)] text-accent-amber-bright"
+                    : "bg-[rgba(59,130,246,0.15)] text-accent-blue"
+                }`}
+              >
+                {u.role}
+              </span>
+            </td>
+            <td className="mono px-4 py-3 text-sm tabular-nums text-text-secondary">
+              {counts.get(u.id) ?? 0}
+            </td>
+            <td className="px-4 py-3 text-xs text-text-muted">—</td>
             <td className="px-4 py-3 text-right">
-              <button
-                type="button"
-                onClick={() => setEditId(u.id)}
-                className="mr-2 text-sm font-medium text-sky-600 hover:underline dark:text-sky-400"
+              <Link
+                href={`/admin/users/${u.id}/edit`}
+                className="inline-flex rounded-md p-1.5 text-text-secondary hover:bg-surface-card-hover hover:text-accent-amber"
+                aria-label="Edit user"
               >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm(`Delete user ${u.name}?`)) void deleteUser(u.id);
-                }}
-                className="text-sm font-medium text-red-600 hover:underline dark:text-red-400"
-              >
-                Delete
-              </button>
+                <Pencil className="h-4 w-4" />
+              </Link>
             </td>
           </tr>
         ))}
       </DataTable>
-
-      {openCreate ? (
-        <UserFormModal
-          key="create-user"
-          title="Create user"
-          mode="create"
-          onClose={() => setOpenCreate(false)}
-          onSave={async (data) => {
-            await createUser(data as CreateUserInput);
-            setOpenCreate(false);
-          }}
-        />
-      ) : null}
-
-      {editId !== null ? (
-        <UserFormModal
-          key={`edit-user-${editId}`}
-          title="Edit user"
-          mode="edit"
-          initial={sorted.find((u) => u.id === editId)}
-          onClose={() => setEditId(null)}
-          onSave={async (data) => {
-            await updateUser(editId, data as UpdateUserInput);
-            setEditId(null);
-          }}
-        />
-      ) : null}
-    </div>
-  );
-}
-
-function UserFormModal({
-  title,
-  mode,
-  initial,
-  onClose,
-  onSave,
-}: {
-  title: string;
-  mode: "create" | "edit";
-  initial?: { name: string; email: string; role: UserRole };
-  onClose: () => void;
-  onSave: (data: CreateUserInput | UpdateUserInput) => Promise<void>;
-}) {
-  const [name, setName] = useState(initial?.name ?? "");
-  const [email, setEmail] = useState(initial?.email ?? "");
-  const [role, setRole] = useState<UserRole>(initial?.role ?? "customer");
-  const [password, setPassword] = useState("");
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div
-        role="dialog"
-        className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-950"
-      >
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{title}</h3>
-        <form
-          className="mt-4 space-y-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            if (!name.trim() || !email.trim()) return;
-            if (mode === "create" && password.length < 8) return;
-            if (mode === "create") {
-              await onSave({
-                name: name.trim(),
-                email: email.trim(),
-                role,
-                password,
-              });
-            } else {
-              const payload: UpdateUserInput = {
-                name: name.trim(),
-                email: email.trim(),
-                role,
-              };
-              if (password.trim()) payload.password = password.trim();
-              await onSave(payload);
-            }
-          }}
-        >
-          <div>
-            <label className="block text-xs font-medium text-zinc-500">Name</label>
-            <input
-              className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-zinc-500">Email</label>
-            <input
-              type="email"
-              className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-zinc-500">
-              Password {mode === "edit" ? "(leave blank to keep)" : ""}
-            </label>
-            <input
-              type="password"
-              className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required={mode === "create"}
-              minLength={mode === "create" ? 8 : undefined}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-zinc-500">Role</label>
-            <select
-              className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-              value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
-            >
-              <option value="customer">Customer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium dark:border-zinc-700"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 }

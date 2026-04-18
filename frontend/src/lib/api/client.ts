@@ -1,5 +1,6 @@
-const baseUrl = () =>
-  (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+export function getApiBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+}
 
 export class ApiError extends Error {
   readonly status: number;
@@ -21,7 +22,7 @@ type FetchOptions = {
 };
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
-  const url = `${baseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
+  const url = `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
   const headers: Record<string, string> = {
     Accept: "application/json",
   };

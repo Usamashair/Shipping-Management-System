@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AppShell } from "@/components/shipping/app-shell";
+import { LoadingScreen } from "@/components/shipping/loading-screen";
 import { useAuth } from "@/lib/auth/context";
 
 export default function CustomerLayout({
@@ -21,31 +21,12 @@ export default function CustomerLayout({
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Checking access…
-      </div>
-    );
+    return <LoadingScreen message="Checking access…" />;
   }
 
   if (user.role !== "customer") {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8 text-sm text-zinc-500 dark:text-zinc-400">
-        Redirecting…
-      </div>
-    );
+    return <LoadingScreen message="Redirecting…" />;
   }
 
-  return (
-    <AppShell
-      title="Customer"
-      badge="API"
-      nav={[
-        { href: "/customer/shipments", label: "My shipments" },
-        { href: "/customer/shipments/new", label: "New shipment" },
-      ]}
-    >
-      {children}
-    </AppShell>
-  );
+  return <>{children}</>;
 }

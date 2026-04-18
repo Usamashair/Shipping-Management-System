@@ -3,37 +3,30 @@
 namespace App\Services\FedEx;
 
 use App\Contracts\FedEx\FedExClient;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use RuntimeException;
+use LogicException;
 
 class RestFedExClient implements FedExClient
 {
     public function __construct(
-        private readonly StubFedExClient $stubLabels,
+        private readonly FedExOAuthToken $fedExOAuthToken,
     ) {}
 
     /**
      * {@inheritdoc}
      *
-     * Live FedEx Ship requests need extra account and payload fields; until those are
-     * configured end-to-end, labels continue to come from {@see StubFedExClient}.
+     * Shipment creation uses {@see FedExShipmentCreateService} with a full FedEx Ship
+     * payload (e.g. from {@see LegacyShipmentDetailsToFedExShipMapper}). The legacy
+     * three-array contract is not used for REST ship.
      */
     public function createShipment(
         array $senderDetails,
         array $receiverDetails,
         array $packageDetails,
     ): array {
-        $result = $this->stubLabels->createShipment($senderDetails, $receiverDetails, $packageDetails);
-        $fedex = $result['fedex_response'];
-        $fedex['mode'] = 'rest';
-        $fedex['create_shipment'] = 'stub_delegate';
-
-        return [
-            'tracking_number' => $result['tracking_number'],
-            'label_base64' => $result['label_base64'],
-            'fedex_response' => $fedex,
-        ];
+        throw new LogicException(
+            'RestFedExClient::createShipment is not used when FEDEX_MODE=rest; use FedExShipmentCreateService instead.'
+        );
     }
 
     /**
@@ -41,7 +34,7 @@ class RestFedExClient implements FedExClient
      */
     public function track(string $trackingNumber): array
     {
-        $token = $this->accessToken();
+        $token = $this->fedExOAuthToken->getToken();
         $base = rtrim((string) config('fedex.base_url'), '/');
         $timeout = (int) config('fedex.http_timeout', 30);
 
@@ -161,34 +154,5 @@ class RestFedExClient implements FedExClient
         }
 
         return null;
-    }
-
-    private function accessToken(): string
-    {
-        $ttl = (int) config('fedex.token_cache_seconds', 3300);
-
-        return Cache::remember('fedex.oauth.access_token', max(60, $ttl), function (): string {
-            $base = rtrim((string) config('fedex.base_url'), '/');
-            $timeout = (int) config('fedex.http_timeout', 30);
-
-            $response = Http::asForm()
-                ->timeout($timeout)
-                ->post($base.'/oauth/token', [
-                    'grant_type' => 'client_credentials',
-                    'client_id' => (string) config('fedex.client_id'),
-                    'client_secret' => (string) config('fedex.client_secret'),
-                ]);
-
-            if (! $response->successful()) {
-                throw new RuntimeException('FedEx OAuth failed: HTTP '.$response->status());
-            }
-
-            $token = $response->json('access_token');
-            if (! is_string($token) || $token === '') {
-                throw new RuntimeException('FedEx OAuth response missing access_token.');
-            }
-
-            return $token;
-        });
     }
 }

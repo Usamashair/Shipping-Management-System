@@ -1,45 +1,229 @@
+import { ArrowRight, CheckCircle, Package, Radio } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-20">
-        <p className="text-sm font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Shipping Management System
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Dashboard
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg-base)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: -200,
+          left: -200,
+          width: 600,
+          height: 600,
+          background: "radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          bottom: -100,
+          right: -100,
+          width: 500,
+          height: 500,
+          background: "radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          backgroundImage: "radial-gradient(circle, var(--border-subtle) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+          opacity: 0.6,
+          pointerEvents: "none",
+        }}
+      />
+
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 1.25rem" }}>
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: "var(--amber-dim)",
+            color: "var(--amber)",
+            border: "1px solid var(--border-accent)",
+            borderRadius: 20,
+            padding: "6px 16px",
+            fontSize: 12,
+            fontWeight: 600,
+            marginBottom: 24,
+            animation: "fadeUp 0.5s ease forwards",
+          }}
+        >
+          ✦ FedEx Certified Shipping Platform
+        </div>
+
+        <h1
+          style={{
+            fontFamily: "Outfit, var(--font-display), sans-serif",
+            fontSize: "clamp(40px, 8vw, 72px)",
+            fontWeight: 800,
+            lineHeight: 1.1,
+            marginBottom: 24,
+            animation: "fadeUp 0.5s 0.1s ease both",
+          }}
+        >
+          Ship Smarter.{" "}
+          <span
+            style={{
+              background: "linear-gradient(135deg, var(--amber), var(--amber-light))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Track Everything.
+          </span>
         </h1>
-        <p className="mt-4 text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
-          Sign in to reach the Next.js dashboards backed by the Laravel API (Sanctum tokens, role-based
-          routes, stub FedEx integration on the server).
+
+        <p
+          style={{
+            fontSize: 18,
+            color: "var(--text-secondary)",
+            maxWidth: 500,
+            margin: "0 auto 40px",
+            animation: "fadeUp 0.5s 0.2s ease both",
+          }}
+        >
+          Professional FedEx shipping management — labels, tracking, and address validation in one platform.
         </p>
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 12,
+            justifyContent: "center",
+            animation: "fadeUp 0.5s 0.25s ease both",
+          }}
+        >
           <Link
             href="/login"
-            className="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            style={{
+              background: "var(--amber)",
+              color: "#000",
+              padding: "12px 28px",
+              borderRadius: "var(--radius-md)",
+              fontWeight: 700,
+              fontSize: 15,
+              border: "none",
+              cursor: "pointer",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              transition: "all 0.18s ease",
+            }}
+            className="hover:brightness-110 motion-safe:hover:-translate-y-px"
           >
-            Sign in
+            Admin Portal
+            <ArrowRight size={18} aria-hidden />
           </Link>
           <Link
-            href="/admin"
-            className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+            href="/login"
+            style={{
+              background: "transparent",
+              color: "var(--amber)",
+              border: "1px solid var(--border-accent)",
+              padding: "12px 28px",
+              borderRadius: "var(--radius-md)",
+              fontWeight: 600,
+              fontSize: 15,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              transition: "all 0.18s ease",
+            }}
+            className="hover:bg-[var(--amber-dim)]"
           >
-            Admin (requires session)
-          </Link>
-          <Link
-            href="/customer/shipments"
-            className="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
-          >
-            Customer (requires session)
+            Customer Login
+            <ArrowRight size={18} aria-hidden />
           </Link>
         </div>
-        <p className="mt-10 text-xs text-zinc-500 dark:text-zinc-500">
-          <Link href="/dev/api-health" className="font-medium text-sky-600 hover:underline dark:text-sky-400">
-            Backend health check
-          </Link>
-        </p>
-      </main>
-    </div>
+
+        <div
+          style={{
+            marginTop: 64,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 16,
+            justifyContent: "center",
+          }}
+        >
+          {[
+            {
+              Icon: Package,
+              title: "Label Generation",
+              sub: "Instant FedEx labels",
+              delay: "0.3s",
+              color: "var(--amber)",
+            },
+            {
+              Icon: Radio,
+              title: "Live Tracking",
+              sub: "Real-time updates",
+              delay: "0.4s",
+              color: "var(--text-secondary)",
+            },
+            {
+              Icon: CheckCircle,
+              title: "Address Validation",
+              sub: "Smart correction",
+              delay: "0.5s",
+              color: "var(--green)",
+            },
+          ].map((c) => (
+            <div
+              key={c.title}
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-default)",
+                borderRadius: "var(--radius-lg)",
+                padding: 24,
+                width: 200,
+                textAlign: "center",
+                animation: `fadeUp 0.5s ${c.delay} ease both`,
+                transition: "all 0.2s ease",
+              }}
+              className="motion-safe:hover:-translate-y-1 motion-safe:hover:border-[var(--border-accent)]"
+            >
+              <c.Icon size={32} color={c.color} style={{ margin: "0 auto 12px" }} aria-hidden />
+              <p
+                style={{
+                  fontFamily: "Outfit, var(--font-display), sans-serif",
+                  fontWeight: 700,
+                  fontSize: 16,
+                  color: "var(--text-primary)",
+                  marginBottom: 8,
+                }}
+              >
+                {c.title}
+              </p>
+              <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>{c.sub}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }

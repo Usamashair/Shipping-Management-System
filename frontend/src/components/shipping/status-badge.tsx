@@ -1,28 +1,80 @@
-import type { ShipmentStatus } from "@/lib/types";
+"use client";
 
-const styles: Record<ShipmentStatus, string> = {
-  pending:
-    "bg-amber-100 text-amber-900 ring-amber-200 dark:bg-amber-950/60 dark:text-amber-100 dark:ring-amber-900",
-  in_transit:
-    "bg-sky-100 text-sky-900 ring-sky-200 dark:bg-sky-950/60 dark:text-sky-100 dark:ring-sky-900",
-  delivered:
-    "bg-emerald-100 text-emerald-900 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-100 dark:ring-emerald-900",
-  failed:
-    "bg-red-100 text-red-900 ring-red-200 dark:bg-red-950/60 dark:text-red-100 dark:ring-red-900",
-};
+import type { ShipmentStatus } from "@/lib/types";
 
 const labels: Record<ShipmentStatus, string> = {
   pending: "Pending",
   in_transit: "In transit",
   delivered: "Delivered",
   failed: "Failed",
+  label_created: "Label created",
+  cancelled: "Cancelled",
 };
 
-export function StatusBadge({ status }: { status: ShipmentStatus }) {
+const styleVars: Record<
+  ShipmentStatus,
+  { fg: string; bg: string; pulse?: boolean; dot?: boolean }
+> = {
+  pending: {
+    fg: "var(--status-pending-fg)",
+    bg: "var(--status-pending-bg)",
+    dot: true,
+  },
+  in_transit: {
+    fg: "var(--status-in-transit-fg)",
+    bg: "var(--status-in-transit-bg)",
+    dot: true,
+    pulse: true,
+  },
+  delivered: {
+    fg: "var(--status-delivered-fg)",
+    bg: "var(--status-delivered-bg)",
+    dot: false,
+  },
+  failed: {
+    fg: "var(--status-failed-fg)",
+    bg: "var(--status-failed-bg)",
+    dot: true,
+  },
+  label_created: {
+    fg: "var(--status-label-fg)",
+    bg: "var(--status-label-bg)",
+    dot: false,
+  },
+  cancelled: {
+    fg: "var(--status-cancelled-fg)",
+    bg: "var(--status-cancelled-bg)",
+    dot: false,
+  },
+};
+
+export function StatusBadge({
+  status,
+  size = "default",
+}: {
+  status: ShipmentStatus;
+  size?: "default" | "lg";
+}) {
+  const cfg = styleVars[status];
+  const textSize = size === "lg" ? "text-xs" : "text-[11px]";
+  const pad = size === "lg" ? "px-2.5 py-1" : "px-2 py-0.5";
+
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${styles[status]}`}
+      className={`mono inline-flex items-center gap-1.5 rounded font-semibold uppercase tracking-wider tabular-nums ${textSize} ${pad}`}
+      style={{
+        color: cfg.fg,
+        backgroundColor: cfg.bg,
+        letterSpacing: "0.08em",
+      }}
     >
+      {cfg.dot ? (
+        <span
+          className={`h-1.5 w-1.5 shrink-0 rounded-full ${cfg.pulse ? "animate-pulse-dot motion-reduce:animate-none" : ""}`}
+          style={{ backgroundColor: cfg.fg }}
+          aria-hidden
+        />
+      ) : null}
       {labels[status]}
     </span>
   );

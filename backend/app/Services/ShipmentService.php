@@ -6,7 +6,9 @@ use App\Contracts\FedEx\FedExClient;
 use App\Models\Shipment;
 use App\Models\TrackingLog;
 use App\Models\User;
+use App\Services\FedEx\FedExShipmentCreateService;
 use App\Services\FedEx\FedExStatusMapper;
+use App\Services\FedEx\LegacyShipmentDetailsToFedExShipMapper;
 use Illuminate\Support\Facades\Storage;
 
 class ShipmentService
@@ -14,6 +16,8 @@ class ShipmentService
     public function __construct(
         protected FedExClient $fedEx,
         protected FedExStatusMapper $statusMapper,
+        protected LegacyShipmentDetailsToFedExShipMapper $legacyToFedExMapper,
+        protected FedExShipmentCreateService $fedExShipmentCreate,
     ) {}
 
     /**
@@ -23,6 +27,24 @@ class ShipmentService
      */
     public function createForUser(User $user, array $sender, array $receiver, array $package): Shipment
     {
+        if (config('fedex.mode') === 'rest' && FedExShipmentCreateService::isConfigured()) {
+            $fedexPayload = $this->legacyToFedExMapper->toFedExShipPayload($sender, $receiver, $package);
+            $shipment = $this->fedExShipmentCreate->create($user, $fedexPayload, true);
+
+            TrackingLog::query()->create([
+                'shipment_id' => $shipment->id,
+                'status' => 'Label created (FedEx Ship)',
+                'location' => ($sender['city'] ?? 'Origin').', '.($sender['state'] ?? ''),
+                'logged_at' => now(),
+                'raw_response' => [
+                    'phase' => 'create',
+                    'fedex_transaction_id' => $shipment->fedex_transaction_id,
+                ],
+            ]);
+
+            return $shipment->fresh(['trackingLogs']);
+        }
+
         $result = $this->fedEx->createShipment($sender, $receiver, $package);
 
         $shipment = Shipment::query()->create([

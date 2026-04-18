@@ -1,21 +1,28 @@
 import Link from "next/link";
 import { ApiHealthStatus } from "@/components/api-health-status";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 export default function ApiHealthDevPage() {
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 py-16">
-      <div>
-        <Link href="/" className="text-sm font-medium text-sky-600 dark:text-sky-400">
-          Home
-        </Link>
-        <h1 className="mt-4 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Backend health (dev)
-        </h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Optional check against <code className="font-mono text-xs">NEXT_PUBLIC_API_URL</code>.
-        </p>
+    <div className="flex min-h-screen flex-col bg-surface-deep text-text-primary supports-[min-height:100dvh]:min-h-[100dvh]">
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-8 px-4 py-16">
+        <div>
+          <Link href="/" className="text-sm font-semibold text-accent-blue hover:text-accent-amber">
+            ← Home
+          </Link>
+          <h1
+            className="mt-4 text-2xl font-bold text-text-primary"
+            style={{ fontFamily: "var(--font-syne), sans-serif" }}
+          >
+            Backend health
+          </h1>
+          <p className="mt-2 text-sm text-text-secondary">
+            Optional check against <code className="mono text-xs text-text-muted">NEXT_PUBLIC_API_URL</code>
+          </p>
+        </div>
+        <ApiHealthStatus />
       </div>
-      <ApiHealthStatus />
+      <SiteFooter />
     </div>
   );
 }

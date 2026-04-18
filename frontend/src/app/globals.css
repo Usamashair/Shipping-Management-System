@@ -1,26 +1,347 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Midnight Cargo — core tokens */
+  --bg-base: #060a10;
+  --bg-surface: #0b1119;
+  --bg-card: #0f1923;
+  --bg-card-hover: #141f2e;
+  --bg-input: #0b1119;
+
+  --border-subtle: #1a2535;
+  --border-default: #1e2d42;
+  --border-strong: #2a3f5a;
+  --border-accent: rgba(245, 158, 11, 0.4);
+
+  --amber: #f59e0b;
+  --amber-light: #fbbf24;
+  --amber-dim: rgba(245, 158, 11, 0.12);
+  --amber-glow: rgba(245, 158, 11, 0.06);
+
+  --blue: #3b82f6;
+  --blue-dim: rgba(59, 130, 246, 0.12);
+  --green: #10b981;
+  --green-dim: rgba(16, 185, 129, 0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239, 68, 68, 0.12);
+  --purple: #8b5cf6;
+  --purple-dim: rgba(139, 92, 246, 0.12);
+
+  --text-primary: #eaf2ff;
+  --text-secondary: #7a96b4;
+  --text-muted: #3d5470;
+
+  --sidebar-width: 260px;
+  --header-height: 64px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 32px rgba(245, 158, 11, 0.08);
+
+  /* Typography (Outfit + Fira Code via layout <head>) */
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-body: "Outfit", system-ui, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, monospace;
+
+  /* Legacy aliases — keep existing Tailwind @theme utilities working */
+  --bg-primary: var(--bg-base);
+  --bg-secondary: var(--bg-surface);
+  --bg-tertiary: var(--bg-card);
+  --bg-surface-card: var(--bg-card);
+  --bg-surface-hover: var(--bg-card-hover);
+  --bg-surface-deep: var(--bg-base);
+  --bg-surface-raised: var(--bg-card-hover);
+  --bg-surface-card-hover: var(--bg-card-hover);
+  --bg-input-field: var(--bg-input);
+  --border: var(--border-default);
+  --border-light: var(--border-subtle);
+  --gradient-amber: linear-gradient(135deg, var(--amber), var(--amber-light));
+  --accent-amber: var(--amber);
+  --accent-amber-bright: var(--amber-light);
+  --accent-amber-glow: var(--amber-dim);
+  --accent-blue: var(--blue);
+  --accent-blue-glow: var(--blue-dim);
+  --accent-green: var(--green);
+  --accent-green-glow: var(--green-dim);
+  --accent-red: var(--red);
+  --accent-red-glow: var(--red-dim);
+  --accent-purple: var(--purple);
+  --accent-purple-glow: var(--purple-dim);
+  --text-primary-legacy: var(--text-primary);
+  --text-secondary-legacy: var(--text-secondary);
+  --text-muted-legacy: var(--text-muted);
+  --font-syne: var(--font-display);
+  --font-dm-sans: var(--font-body);
+  --font-jetbrains-mono: var(--font-mono);
+
+  --status-pending-bg: var(--amber-dim);
+  --status-pending-text: var(--amber);
+  --status-processing-bg: var(--blue-dim);
+  --status-processing-text: var(--blue);
+  --status-shipped-bg: var(--purple-dim);
+  --status-shipped-text: var(--purple);
+  --status-delivered-bg: var(--green-dim);
+  --status-delivered-text: var(--green);
+  --status-cancelled-bg: var(--red-dim);
+  --status-cancelled-text: var(--red);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html,
+body {
+  height: 100%;
+  font-family: var(--font-display);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+.text-amber {
+  color: var(--amber);
+}
+.text-muted {
+  color: var(--text-muted);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: fadeUp 0.3s ease forwards;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-card-hover) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ping-soft {
+  75%,
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: translateY(-20vh) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .skeleton {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-bg-surface-card: var(--bg-surface-card);
+  --color-bg-surface-hover: var(--bg-surface-hover);
+  --color-bg-surface-deep: var(--bg-surface-deep);
+  --color-bg-surface-raised: var(--bg-surface-raised);
+  --color-bg-surface-card-hover: var(--bg-surface-card-hover);
+  --color-bg-input-field: var(--bg-input-field);
+  --color-surface-deep: var(--bg-surface-deep);
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-default: var(--border-default);
+  --color-border-accent: var(--border-accent);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-amber-bright: var(--accent-amber-bright);
+  --color-accent-amber-glow: var(--accent-amber-glow);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-blue-glow: var(--accent-blue-glow);
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-glow: var(--accent-green-glow);
+  --color-accent-red: var(--accent-red);
+  --color-accent-red-glow: var(--accent-red-glow);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-purple-glow: var(--accent-purple-glow);
+  --color-text-primary: var(--text-primary-legacy);
+  --color-text-secondary: var(--text-secondary-legacy);
+  --color-text-muted: var(--text-muted-legacy);
+  --font-syne: var(--font-syne);
+  --font-dm-sans: var(--font-dm-sans);
+  --font-jetbrains-mono: var(--font-jetbrains-mono);
+  --shadow-glow: 0 0 32px rgba(245, 158, 11, 0.08);
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.5);
 }

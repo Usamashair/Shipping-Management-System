@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Models\Shipment;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,7 +12,7 @@ class UpdateShipmentStatusRequest extends FormRequest
     {
         $shipment = $this->route('shipment');
 
-        return $shipment instanceof \App\Models\Shipment
+        return $shipment instanceof Shipment
             && ($this->user()?->can('updateStatus', $shipment) ?? false);
     }
 
@@ -21,7 +22,7 @@ class UpdateShipmentStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::in(['pending', 'in_transit', 'delivered', 'failed'])],
+            'status' => ['required', Rule::in(['pending', 'in_transit', 'delivered', 'failed', 'label_created', 'cancelled'])],
         ];
     }
 }
