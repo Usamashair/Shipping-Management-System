@@ -1,0 +1,15 @@
+# Root (monorepo)
+/node_modules/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+*.log
+.cursor/
+.idea/
+.vscode/
+
+# Secrets at repo root (if any)
+.env
+.env.local
+.env.*.local
