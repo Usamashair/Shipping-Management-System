@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { ApiError, apiFetch } from "@/lib/api/client";
+import { cancelFedExShipment } from "@/lib/api/shipments";
 import { unwrapDataRecord } from "@/lib/api/laravel-resource";
 import { useAuth } from "@/lib/auth/context";
 import type {
@@ -17,6 +18,7 @@ import type {
   Shipment,
   ShipmentStatus,
   TrackingLog,
+  UpdateAdminShipmentInput,
   UpdateUserInput,
   User,
 } from "@/lib/types";
@@ -38,9 +40,12 @@ type ApiStoreValue = {
   getShipment: (id: number) => Shipment | undefined;
   loadShipment: (id: number) => Promise<void>;
   createAdminShipment: (input: CreateAdminShipmentInput) => Promise<Shipment>;
+  updateAdminShipment: (id: number, input: UpdateAdminShipmentInput) => Promise<void>;
+  deleteAdminShipment: (id: number) => Promise<void>;
   updateShipmentStatus: (id: number, status: ShipmentStatus) => Promise<void>;
   getTrackingLogs: (shipmentId: number) => TrackingLog[];
   trackShipment: (shipmentId: number) => Promise<void>;
+  cancelCustomerShipment: (shipmentId: number) => Promise<void>;
 };
 
 const ApiStoreContext = createContext<ApiStoreValue | null>(null);
@@ -221,6 +226,7 @@ export function ApiStoreProvider({ children }: { children: ReactNode }) {
       });
       try {
         await refreshUsers();
+        await refreshShipments("all");
       } catch (e) {
         if (e instanceof ApiError && e.status === 403) {
           await logout();
@@ -230,7 +236,7 @@ export function ApiStoreProvider({ children }: { children: ReactNode }) {
         throw e;
       }
     },
-    [token, refreshUsers, logout],
+    [token, refreshUsers, refreshShipments, logout],
   );
 
   const createAdminShipment = useCallback(
@@ -245,6 +251,35 @@ export function ApiStoreProvider({ children }: { children: ReactNode }) {
       setShipmentById((prev) => ({ ...prev, [created.id]: created }));
       await refreshShipments("all");
       return created;
+    },
+    [token, refreshShipments],
+  );
+
+  const updateAdminShipment = useCallback(
+    async (id: number, input: UpdateAdminShipmentInput) => {
+      if (!token) return;
+      const raw = await apiFetch<unknown>(`/api/admin/shipments/${id}`, {
+        method: "PATCH",
+        token,
+        body: input,
+      });
+      const updated = normalizeShipment(unwrapDataRecord<Shipment>(raw));
+      setShipmentById((prev) => ({ ...prev, [id]: updated }));
+      await refreshShipments("all");
+    },
+    [token, refreshShipments],
+  );
+
+  const deleteAdminShipment = useCallback(
+    async (id: number) => {
+      if (!token) return;
+      await apiFetch(`/api/admin/shipments/${id}`, { method: "DELETE", token });
+      setShipmentById((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      await refreshShipments("all");
     },
     [token, refreshShipments],
   );
@@ -278,6 +313,15 @@ export function ApiStoreProvider({ children }: { children: ReactNode }) {
     [token, refreshShipments],
   );
 
+  const cancelCustomerShipment = useCallback(
+    async (shipmentId: number) => {
+      if (!token) return;
+      await cancelFedExShipment(token, shipmentId);
+      await refreshShipments("mine");
+    },
+    [token, refreshShipments],
+  );
+
   const value = useMemo<ApiStoreValue>(
     () => ({
       listUsers,
@@ -292,9 +336,12 @@ export function ApiStoreProvider({ children }: { children: ReactNode }) {
       getShipment,
       loadShipment,
       createAdminShipment,
+      updateAdminShipment,
+      deleteAdminShipment,
       updateShipmentStatus,
       getTrackingLogs,
       trackShipment,
+      cancelCustomerShipment,
     }),
     [
       listUsers,
@@ -309,9 +356,12 @@ export function ApiStoreProvider({ children }: { children: ReactNode }) {
       getShipment,
       loadShipment,
       createAdminShipment,
+      updateAdminShipment,
+      deleteAdminShipment,
       updateShipmentStatus,
       getTrackingLogs,
       trackShipment,
+      cancelCustomerShipment,
     ],
   );
 

@@ -1,36 +1,63 @@
 "use client";
 
 import { Box } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import {
+  DASHBOARD_CARD_INSET,
+  DASHBOARD_GRADIENT_CARD_CLASS,
+  DASHBOARD_SECTION_HEADER_CLASS,
+} from "@/lib/dashboardCardStyles";
 import type { PackageDetails } from "@/lib/types";
+
+const DT =
+  "mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted sm:text-sm sm:tracking-wide";
+const DD = "mono text-xl font-semibold tabular-nums leading-snug text-text-primary sm:text-2xl";
 
 export function ShipmentPackageCard({ pkg }: { pkg: PackageDetails }) {
   return (
-    <div className="rounded-xl border border-border-default bg-surface-raised p-5">
-      <h3
-        className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-text-secondary"
-        style={{ fontFamily: "var(--font-syne), sans-serif" }}
+    <Card className={DASHBOARD_GRADIENT_CARD_CLASS}>
+      <div
+        className={`${DASHBOARD_SECTION_HEADER_CLASS} flex flex-wrap items-center gap-3`}
+        style={DASHBOARD_CARD_INSET}
       >
-        <Box className="h-4 w-4 text-accent-amber" aria-hidden />
-        Package
-      </h3>
-      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-text-muted">Weight</dt>
-          <dd className="mono mt-1 font-medium tabular-nums text-text-primary">
-            {pkg.weightLb} lb
-          </dd>
+        <h3
+          className="flex items-center gap-2.5 text-lg font-bold text-text-primary"
+          style={{ fontFamily: "var(--font-display), sans-serif" }}
+        >
+          <Box className="h-5 w-5 shrink-0 text-accent-amber" aria-hidden />
+          Package
+        </h3>
+      </div>
+      <div className="min-w-0 space-y-6" style={DASHBOARD_CARD_INSET}>
+        <dl className="grid w-full min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4 md:gap-x-8 md:gap-y-6">
+          <div className="min-h-[4.25rem] rounded-[var(--radius-md)] border border-border-subtle/80 bg-surface-raised/30 px-4 py-3 sm:min-h-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
+            <dt className={DT}>Weight</dt>
+            <dd className={DD}>{pkg.weightLb} lb</dd>
+          </div>
+          <div className="min-h-[4.25rem] rounded-[var(--radius-md)] border border-border-subtle/80 bg-surface-raised/30 px-4 py-3 sm:min-h-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
+            <dt className={DT}>Length (in)</dt>
+            <dd className={DD}>{pkg.lengthIn}</dd>
+          </div>
+          <div className="min-h-[4.25rem] rounded-[var(--radius-md)] border border-border-subtle/80 bg-surface-raised/30 px-4 py-3 sm:min-h-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
+            <dt className={DT}>Width (in)</dt>
+            <dd className={DD}>{pkg.widthIn}</dd>
+          </div>
+          <div className="min-h-[4.25rem] rounded-[var(--radius-md)] border border-border-subtle/80 bg-surface-raised/30 px-4 py-3 sm:min-h-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
+            <dt className={DT}>Height (in)</dt>
+            <dd className={DD}>{pkg.heightIn}</dd>
+          </div>
+        </dl>
+        <div className="border-t border-border-subtle pt-2">
+          <dl className="min-w-0">
+            <dt className="mb-2.5 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted sm:text-sm sm:tracking-wide">
+              Description
+            </dt>
+            <dd className="text-base font-medium leading-relaxed text-text-primary sm:text-lg">
+              {pkg.description}
+            </dd>
+          </dl>
         </div>
-        <div>
-          <dt className="text-text-muted">Dimensions (in)</dt>
-          <dd className="mono mt-1 font-medium tabular-nums text-text-primary">
-            {pkg.lengthIn} × {pkg.widthIn} × {pkg.heightIn}
-          </dd>
-        </div>
-        <div className="sm:col-span-2">
-          <dt className="text-text-muted">Description</dt>
-          <dd className="mt-1 text-text-primary">{pkg.description}</dd>
-        </div>
-      </dl>
-    </div>
+      </div>
+    </Card>
   );
 }

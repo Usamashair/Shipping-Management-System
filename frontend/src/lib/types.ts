@@ -13,6 +13,51 @@ export type User = {
   name: string;
   email: string;
   role: UserRole;
+  phone?: string | null;
+  address_street?: string | null;
+  address_street2?: string | null;
+  address_city?: string | null;
+  address_state?: string | null;
+  address_postal_code?: string | null;
+  address_country?: string | null;
+  address_company?: string | null;
+  address_saved?: boolean;
+  address_fedex_verified?: boolean;
+  address_saved_at?: string | null;
+  address_verified_at?: string | null;
+  has_address?: boolean;
+};
+
+export type UserProfile = {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+  phone: string | null;
+  address_street: string | null;
+  address_street2: string | null;
+  address_city: string | null;
+  address_state: string | null;
+  address_postal_code: string | null;
+  address_country: string;
+  address_company: string | null;
+  address_saved: boolean;
+  address_fedex_verified: boolean;
+  address_saved_at: string | null;
+  address_verified_at: string | null;
+  has_address: boolean;
+};
+
+export type ProfileFormData = {
+  name: string;
+  phone: string;
+  company: string;
+  street: string;
+  street2: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
 };
 
 export type AddressDetails = {
@@ -25,6 +70,23 @@ export type AddressDetails = {
   postalCode: string;
   country: string;
   phone: string;
+  email?: string;
+};
+
+/** System ship-to; server overrides FedEx `recipients` with this. */
+export type FixedRecipient = {
+  personName: string;
+  companyName: string;
+  phoneNumber: string;
+  email: string;
+  address: {
+    streetLines: string[];
+    city: string;
+    stateOrProvinceCode: string;
+    postalCode: string;
+    countryCode: string;
+    residential: boolean;
+  };
 };
 
 export type PackageDetails = {
@@ -92,4 +154,10 @@ export type CreateAdminShipmentInput = {
   sender_details: AddressDetails;
   receiver_details: AddressDetails;
   package_details: PackageDetails;
+};
+
+/** Admin update: `PATCH /api/admin/shipments/{id}` */
+export type UpdateAdminShipmentInput = {
+  user_id?: number;
+  status?: ShipmentStatus;
 };

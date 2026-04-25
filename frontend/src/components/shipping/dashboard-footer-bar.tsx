@@ -43,7 +43,7 @@ export function DashboardFooterBar({
 
   return (
     <div
-      className={`${visibility} mt-auto items-center justify-between gap-3 border-t border-border-default bg-surface-raised/90 px-4 py-2.5 text-[11px] text-text-muted backdrop-blur-sm`}
+      className={`${visibility} mt-auto items-center justify-between gap-3 border-t border-border-subtle bg-surface-card/95 px-[var(--ds-container-margin)] py-2.5 text-[11px] text-text-muted`}
     >
       <span className="min-w-0 truncate">
         {user ? (

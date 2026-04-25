@@ -80,12 +80,12 @@ export default function AdminShipmentStatusPage() {
         </Link>
         <h2
           className="mt-2 text-2xl font-bold text-text-primary"
-          style={{ fontFamily: "var(--font-syne), sans-serif" }}
+          style={{ fontFamily: "var(--font-display), sans-serif" }}
         >
           Update status
         </h2>
         <p className="mt-1 text-xs text-text-muted">
-          <code className="mono rounded bg-surface-deep px-1 py-0.5">PATCH /api/admin/shipments/{id}/status</code>
+          <code className="mono rounded bg-surface-card-hover px-1 py-0.5">PATCH /api/admin/shipments/{id}/status</code>
         </p>
       </div>
 

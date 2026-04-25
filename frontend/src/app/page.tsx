@@ -23,7 +23,7 @@ export default function Home() {
           left: -200,
           width: 600,
           height: 600,
-          background: "radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(40,180,164,0.08) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
@@ -74,7 +74,7 @@ export default function Home() {
 
         <h1
           style={{
-            fontFamily: "Outfit, var(--font-display), sans-serif",
+            fontFamily: "var(--font-display), sans-serif",
             fontSize: "clamp(40px, 8vw, 72px)",
             fontWeight: 800,
             lineHeight: 1.1,
@@ -120,7 +120,7 @@ export default function Home() {
             href="/login"
             style={{
               background: "var(--amber)",
-              color: "#000",
+              color: "#fff",
               padding: "12px 28px",
               borderRadius: "var(--radius-md)",
               fontWeight: 700,
@@ -135,11 +135,11 @@ export default function Home() {
             }}
             className="hover:brightness-110 motion-safe:hover:-translate-y-px"
           >
-            Admin Portal
+            Sign in
             <ArrowRight size={18} aria-hidden />
           </Link>
           <Link
-            href="/login"
+            href="/signup"
             style={{
               background: "transparent",
               color: "var(--amber)",
@@ -156,7 +156,7 @@ export default function Home() {
             }}
             className="hover:bg-[var(--amber-dim)]"
           >
-            Customer Login
+            Create account
             <ArrowRight size={18} aria-hidden />
           </Link>
         </div>
@@ -210,7 +210,7 @@ export default function Home() {
               <c.Icon size={32} color={c.color} style={{ margin: "0 auto 12px" }} aria-hidden />
               <p
                 style={{
-                  fontFamily: "Outfit, var(--font-display), sans-serif",
+                  fontFamily: "var(--font-display), sans-serif",
                   fontWeight: 700,
                   fontSize: 16,
                   color: "var(--text-primary)",

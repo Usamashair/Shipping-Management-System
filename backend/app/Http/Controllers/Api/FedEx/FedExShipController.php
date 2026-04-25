@@ -35,11 +35,17 @@ class FedExShipController extends Controller
         try {
             $data = $request->validated();
             $data['is_residential'] = (bool) ($data['is_residential'] ?? false);
+            Log::debug('Incoming FedEx ship validate data', ['data' => $data]);
             $result = $this->fedExShip->validateShipment($data);
+            $raw = $result['raw'];
 
             return response()->json([
                 'alerts' => $result['alerts'],
+                'transaction_id' => $result['transaction_id'],
+                'fedex_transaction_id' => isset($raw['transactionId']) ? (string) $raw['transactionId'] : null,
             ]);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('FedEx ship validate failed.', ['message' => $e->getMessage()]);
 
@@ -58,6 +64,10 @@ class FedExShipController extends Controller
         $data['is_residential'] = (bool) ($data['is_residential'] ?? false);
         $confirmWarnings = (bool) ($data['confirm_warnings'] ?? false);
         unset($data['confirm_warnings']);
+
+        Log::debug('Incoming request data', ['data' => $data]);
+
+        // FedEx pre-flight (Address, Rate, packages/validate) is handled inside FedExShipmentCreateService::create; sandbox is gated by config('fedex.env').
 
         try {
             $shipment = $this->fedExShipmentCreate->create($user, $data, $confirmWarnings);
@@ -97,6 +107,8 @@ class FedExShipController extends Controller
                 'success' => $result['cancelled'],
                 'message' => $result['message'],
             ]);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('FedEx ship cancel failed.', ['message' => $e->getMessage()]);
 
@@ -129,7 +141,13 @@ class FedExShipController extends Controller
         try {
             $raw = $this->fedExShip->retrieveAsyncShipment($jobId);
 
-            return response()->json(['output' => $raw['output'] ?? $raw]);
+            return response()->json([
+                'transaction_id' => $raw['transactionId'] ?? null,
+                'customer_transaction_id' => $raw['customerTransactionId'] ?? null,
+                'output' => $raw['output'] ?? null,
+            ]);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('FedEx async status failed.', ['message' => $e->getMessage()]);
 
@@ -153,6 +171,7 @@ class FedExShipController extends Controller
             $addr = $recipient['address'];
             $addrLines = is_array($addr['streetLines'] ?? null) ? $addr['streetLines'] : [];
 
+            $inEffect = config('fedex.address_validation_in_effect_as_of');
             $addrResult = $this->addressValidation->validateAddresses([
                 [
                     'streetLines' => array_values(array_filter($addrLines, fn ($s) => is_string($s) && $s !== '')),
@@ -161,7 +180,7 @@ class FedExShipController extends Controller
                     'postalCode' => (string) ($addr['postalCode'] ?? ''),
                     'countryCode' => (string) ($addr['countryCode'] ?? ''),
                 ],
-            ]);
+            ], is_string($inEffect) && $inEffect !== '' ? $inEffect : null);
 
             $first = $addrResult['results'][0] ?? null;
             if (! is_array($first) || empty($first['isValid'])) {
@@ -180,6 +199,7 @@ class FedExShipController extends Controller
             }
 
             $created = $this->fedExShip->createTag($data);
+            $raw = $created['raw'];
 
             return response()->json([
                 'tracking_number' => $created['trackingNumber'],
@@ -187,9 +207,13 @@ class FedExShipController extends Controller
                 'service_type' => $created['serviceType'],
                 'ship_timestamp' => $created['shipTimestamp'],
                 'job_id' => $created['jobId'],
-                'fedex_transaction_id' => $created['transaction_id'],
-                'fedex_response' => $created['raw'],
+                'transaction_id' => $created['transaction_id'],
+                'fedex_transaction_id' => isset($raw['transactionId']) ? (string) $raw['transactionId'] : null,
+                'customer_transaction_id' => $raw['customerTransactionId'] ?? null,
+                'fedex_response' => $raw,
             ], 201);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('FedEx create tag failed.', ['message' => $e->getMessage()]);
 
@@ -210,13 +234,21 @@ class FedExShipController extends Controller
         try {
             $payload = $request->validated();
             $result = $this->fedExShip->cancelTag($fedexShipmentId, $payload);
+            $raw = $result['raw'];
+            $output = is_array($raw['output'] ?? null) ? $raw['output'] : null;
 
             return response()->json([
+                'cancelled' => $result['cancelled'],
                 'success' => $result['cancelled'],
                 'message' => $result['message'],
-                'fedex_transaction_id' => $result['transaction_id'],
-                'fedex_response' => $result['raw'],
+                'transaction_id' => $result['transaction_id'],
+                'fedex_transaction_id' => isset($raw['transactionId']) ? (string) $raw['transactionId'] : null,
+                'customer_transaction_id' => $raw['customerTransactionId'] ?? null,
+                'output' => $output,
+                'fedex_response' => $raw,
             ]);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('FedEx cancel tag failed.', ['message' => $e->getMessage()]);
 

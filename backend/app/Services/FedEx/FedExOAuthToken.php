@@ -3,7 +3,6 @@
 namespace App\Services\FedEx;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 class FedExOAuthToken
@@ -19,16 +18,45 @@ class FedExOAuthToken
             $base = rtrim((string) config('fedex.base_url'), '/');
             $timeout = (int) config('fedex.http_timeout', 30);
 
-            $response = Http::asForm()
-                ->timeout($timeout)
-                ->post($base.'/oauth/token', [
-                    'grant_type' => 'client_credentials',
-                    'client_id' => (string) config('fedex.client_id'),
-                    'client_secret' => (string) config('fedex.client_secret'),
-                ]);
+            $form = [
+                'grant_type' => (string) config('fedex.oauth_grant_type', 'client_credentials'),
+                'client_id' => (string) config('fedex.client_id'),
+                'client_secret' => (string) config('fedex.client_secret'),
+            ];
+
+            $childKey = config('fedex.oauth_child_key');
+            $childSecret = config('fedex.oauth_child_secret');
+            if (is_string($childKey) && $childKey !== '') {
+                $form['child_Key'] = $childKey;
+            }
+            if (is_string($childSecret) && $childSecret !== '') {
+                $form['child_secret'] = $childSecret;
+            }
+
+            // application/x-www-form-urlencoded (FedEx docs); asForm() sets Content-Type and encodes body.
+            $response = FedExHttp::pending($timeout)
+                ->acceptJson()
+                ->asForm()
+                ->post($base.'/oauth/token', $form);
 
             if (! $response->successful()) {
-                throw new RuntimeException('FedEx OAuth failed: HTTP '.$response->status());
+                $body = $response->json() ?? [];
+                $msg = 'FedEx OAuth failed: HTTP '.$response->status().'.';
+                $errors = is_array($body['errors'] ?? null) ? $body['errors'] : [];
+                if (isset($errors[0]) && is_array($errors[0])) {
+                    $code = isset($errors[0]['code']) ? (string) $errors[0]['code'] : '';
+                    $detail = isset($errors[0]['message']) ? (string) $errors[0]['message'] : '';
+                    if ($detail !== '') {
+                        $msg .= ' '.$detail;
+                    } elseif ($code !== '') {
+                        $msg .= ' '.$code;
+                    }
+                }
+                if (isset($body['transactionId']) && is_string($body['transactionId'])) {
+                    $msg .= ' (transactionId: '.$body['transactionId'].')';
+                }
+
+                throw new RuntimeException($msg);
             }
 
             $token = $response->json('access_token');

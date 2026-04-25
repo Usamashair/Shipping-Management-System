@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureFedExWebhookIp;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsCustomer;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Console\Scheduling\Schedule;
@@ -19,8 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-            'customer' => \App\Http\Middleware\EnsureUserIsCustomer::class,
+            'admin' => EnsureUserIsAdmin::class,
+            'customer' => EnsureUserIsCustomer::class,
+            'fedex.webhook.ip' => EnsureFedExWebhookIp::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

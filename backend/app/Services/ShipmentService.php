@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\FedEx\FedExShipmentCreateService;
 use App\Services\FedEx\FedExStatusMapper;
 use App\Services\FedEx\LegacyShipmentDetailsToFedExShipMapper;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ShipmentService
@@ -21,6 +22,9 @@ class ShipmentService
     ) {}
 
     /**
+     * Legacy JSON shape (admin/customer POST) mapped to FedEx Ship via {@see LegacyShipmentDetailsToFedExShipMapper},
+     * then {@see FedExShipmentCreateService::create}. When FEDEX_ENV=sandbox, FedEx pre-flight (Address, Rate, validate) is skipped or no-op; Ship create uses a virtualized sample.
+     *
      * @param  array<string, mixed>  $sender
      * @param  array<string, mixed>  $receiver
      * @param  array<string, mixed>  $package
@@ -44,6 +48,8 @@ class ShipmentService
 
             return $shipment->fresh(['trackingLogs']);
         }
+
+        $this->logFedExStubFallbackIfDebug();
 
         $result = $this->fedEx->createShipment($sender, $receiver, $package);
 
@@ -101,5 +107,35 @@ class ShipmentService
         Storage::disk('public')->put($relative, $binary);
 
         return $relative;
+    }
+
+    /**
+     * When FEDEX_MODE is not rest or OAuth credentials are missing, legacy creates use StubFedExClient
+     * (FX-STUB-* tracking, no FedEx Ship API). Log the reason in local/debug so misconfiguration is obvious.
+     */
+    private function logFedExStubFallbackIfDebug(): void
+    {
+        if (! config('app.debug') && ! app()->isLocal()) {
+            return;
+        }
+
+        $reasons = [];
+        if (config('fedex.mode') !== 'rest') {
+            $reasons[] = 'FEDEX_MODE is not "rest" (current: '.(string) config('fedex.mode').')';
+        }
+        if (! filled(config('fedex.client_id'))) {
+            $reasons[] = 'FEDEX_CLIENT_ID is empty';
+        }
+        if (! filled(config('fedex.client_secret'))) {
+            $reasons[] = 'FEDEX_CLIENT_SECRET is empty';
+        }
+        if (! filled(config('fedex.account_number'))) {
+            $reasons[] = 'FEDEX_ACCOUNT_NUMBER is empty';
+        }
+
+        Log::warning(
+            'Shipment create using stub FedEx (no live tracking). Set FEDEX_MODE=rest and OAuth credentials, then php artisan config:clear.',
+            ['reasons' => $reasons]
+        );
     }
 }

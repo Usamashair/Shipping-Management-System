@@ -33,5 +33,7 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="FEDEX_MODE" value="stub"/>
+        <!-- Deterministic FedEx tests: do not inherit .env skip (would skip address resolve and break Http::fake order). -->
+        <env name="FEDEX_SKIP_ADDRESS_VALIDATION_IN_SANDBOX" value="false"/>
     </php>
 </phpunit>

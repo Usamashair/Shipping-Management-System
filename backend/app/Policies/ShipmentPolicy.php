@@ -32,9 +32,31 @@ class ShipmentPolicy
         return $user->isAdmin();
     }
 
-    public function cancel(User $user, Shipment $shipment): bool
+    public function update(User $user, Shipment $shipment): bool
     {
         return $user->isAdmin();
+    }
+
+    public function delete(User $user, Shipment $shipment): bool
+    {
+        return $user->isAdmin();
+    }
+
+    public function cancel(User $user, Shipment $shipment): bool
+    {
+        if (! $this->shipmentIsFedexCancellable($shipment)) {
+            return false;
+        }
+
+        return $user->isAdmin() || $shipment->user_id === $user->id;
+    }
+
+    /**
+     * FedEx cancel API only applies before tender; align with statuses we persist pre-delivery.
+     */
+    private function shipmentIsFedexCancellable(Shipment $shipment): bool
+    {
+        return in_array($shipment->status, ['label_created', 'pending', 'in_transit'], true);
     }
 
     public function downloadLabel(User $user, Shipment $shipment): bool

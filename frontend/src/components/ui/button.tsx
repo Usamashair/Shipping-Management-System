@@ -6,13 +6,13 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const variantClass: Record<Variant, string> = {
   primary:
-    "bg-accent-amber text-surface-deep hover:shadow-glow hover:scale-[1.02] active:scale-[0.98]",
+    "bg-accent-amber text-white shadow-sm hover:bg-[var(--brand-primary-hover)] hover:shadow-md active:scale-[0.99]",
   secondary:
-    "border border-accent-amber bg-transparent text-accent-amber hover:bg-[var(--accent-amber-glow)]",
+    "border border-accent-amber bg-transparent text-accent-amber hover:bg-[var(--selection-tint)]",
   ghost:
-    "border border-transparent text-text-secondary hover:border-border-accent hover:bg-surface-card-hover hover:text-text-primary",
+    "border border-transparent text-text-secondary hover:border-border-default hover:bg-surface-card-hover hover:text-text-primary",
   danger:
-    "border border-accent-red/50 bg-transparent text-accent-red hover:bg-[rgba(239,68,68,0.12)]",
+    "border border-accent-red/50 bg-transparent text-accent-red hover:bg-accent-red-glow",
 };
 
 export function Button({
@@ -28,7 +28,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200 ease-out focus:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--accent-amber-glow)] disabled:pointer-events-none disabled:opacity-50 motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${variantClass[variant]} ${className}`}
+      className={`box-border inline-flex min-h-11 max-w-full min-w-0 items-center justify-center gap-2.5 rounded-[var(--radius-md)] px-7 py-2.5 text-center text-sm font-semibold leading-snug transition-colors duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:px-8 [&>svg]:h-[18px] [&>svg]:w-[18px] [&>svg]:shrink-0 motion-reduce:active:scale-100 sm:text-sm ${variantClass[variant]} ${className}`}
       {...props}
     >
       {children}

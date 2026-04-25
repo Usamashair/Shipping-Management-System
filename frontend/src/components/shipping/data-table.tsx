@@ -28,16 +28,26 @@ type DataTableProps = {
   pageSize?: number;
   /** Omit outer chrome when nested inside a Card or panel */
   embedded?: boolean;
+  /** Horizontal padding for header cells, body cells, skeleton, and footer (Tailwind class) */
+  cellPadClass?: string;
   children: ReactNode;
 };
 
-function SkeletonRows({ count, colCount }: { count: number; colCount: number }) {
+function SkeletonRows({
+  count,
+  colCount,
+  cellPadClass,
+}: {
+  count: number;
+  colCount: number;
+  cellPadClass: string;
+}) {
   return (
     <>
       {Array.from({ length: count }).map((_, r) => (
-        <tr key={`sk-${r}`} className="border-b border-border-default">
+        <tr key={`sk-${r}`} className="border-b border-border-subtle">
           {Array.from({ length: colCount }).map((_, c) => (
-            <td key={`sk-${r}-${c}`} className="px-4 py-3">
+            <td key={`sk-${r}-${c}`} className={`${cellPadClass} py-3.5 align-middle`}>
               <div className="skeleton h-4 w-full max-w-[120px]" />
             </td>
           ))}
@@ -50,11 +60,11 @@ function SkeletonRows({ count, colCount }: { count: number; colCount: number }) 
 function PackageIllustration() {
   return (
     <svg
-      width="80"
-      height="80"
+      width="52"
+      height="52"
       viewBox="0 0 80 80"
       fill="none"
-      className="text-accent-amber"
+      className="text-text-muted"
       aria-hidden
     >
       <path
@@ -69,6 +79,8 @@ function PackageIllustration() {
   );
 }
 
+const DEFAULT_CELL_PAD = "px-[var(--ds-card-padding)]";
+
 export function DataTable({
   columns,
   emptyMessage,
@@ -77,6 +89,7 @@ export function DataTable({
   skeletonRows = 5,
   pageSize = 100,
   embedded,
+  cellPadClass = DEFAULT_CELL_PAD,
   children,
 }: DataTableProps) {
   const [page, setPage] = useState(1);
@@ -102,24 +115,22 @@ export function DataTable({
 
   const shell = embedded
     ? "rounded-none border-0 bg-transparent shadow-none"
-    : "rounded-2xl border border-border-default bg-surface-card shadow-card";
+    : "rounded-[var(--radius-lg)] border border-border-default bg-surface-card shadow-card";
 
   if (empty) {
     return (
       <div
-        className={`flex flex-col items-center justify-center px-8 py-16 text-center ${embedded ? "rounded-none border-0 bg-transparent py-12 shadow-none" : "rounded-2xl border border-border-default bg-surface-card shadow-card"}`}
+        className={`flex flex-col items-center justify-center px-6 py-16 text-center sm:px-8 ${embedded ? "rounded-none border-0 bg-transparent py-12 shadow-none" : "rounded-[var(--radius-lg)] border border-border-default bg-surface-card shadow-card"}`}
+        style={{ paddingTop: 64, paddingBottom: 64 }}
       >
         <PackageIllustration />
-        <h3
-          className="mt-6 text-xl font-bold text-text-primary"
-          style={{ fontFamily: "var(--font-syne), sans-serif" }}
-        >
+        <h3 className="mt-4 text-lg font-semibold text-text-primary sm:text-[18px]">
           No shipments found
         </h3>
-        <p className="mt-2 max-w-sm text-sm text-text-secondary">
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-text-secondary sm:text-[14px]">
           {emptyMessage ?? "No rows."}
         </p>
-        {emptyCta ? <div className="mt-6">{emptyCta}</div> : null}
+        {emptyCta ? <div className="mt-5 sm:mt-6">{emptyCta}</div> : null}
       </div>
     );
   }
@@ -127,14 +138,14 @@ export function DataTable({
   return (
     <div className={`overflow-hidden ${shell}`}>
       <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b border-border-default bg-surface-raised">
+        <table className="w-full min-w-full border-collapse text-left text-sm">
+          <thead className="sticky top-0 z-[1] bg-[#EDF9F7]">
+            <tr className="border-b border-border-subtle">
               {columns.map((c) => (
                 <th
                   key={c.key}
                   scope="col"
-                  className={`px-4 py-3 text-[11px] font-semibold uppercase tracking-widest text-text-muted ${c.className ?? ""}`}
+                  className={`whitespace-nowrap ${cellPadClass} py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary ${c.className ?? ""}`}
                 >
                   {c.label}
                 </th>
@@ -143,15 +154,13 @@ export function DataTable({
           </thead>
           <tbody>
             {loading ? (
-              <SkeletonRows count={skeletonRows} colCount={columns.length} />
+              <SkeletonRows count={skeletonRows} colCount={columns.length} cellPadClass={cellPadClass} />
             ) : (
               pagedRows.map((row, i) => {
                 const r = row as ReactElement<HTMLAttributes<HTMLTableRowElement>>;
                 return cloneElement(r, {
                   key: r.key ?? `row-${i}`,
-                  className: `border-b border-border-default transition-colors duration-200 hover:bg-surface-card-hover ${
-                    i % 2 === 0 ? "bg-surface-card" : "bg-surface-deep"
-                  } border-l-[3px] border-l-transparent hover:border-l-accent-amber ${r.props.className ?? ""}`,
+                  className: `border-b border-border-subtle bg-surface-card transition-colors duration-150 hover:bg-[var(--bg-card-hover)] border-l-[4px] border-l-transparent hover:border-l-[var(--selection-bar)] ${r.props.className ?? ""}`,
                 });
               })
             )}
@@ -159,10 +168,10 @@ export function DataTable({
         </table>
       </div>
       {!loading && rows.length > pageSize ? (
-        <div className="flex items-center justify-between border-t border-border-default bg-surface-raised px-4 py-3">
+        <div className={`flex items-center justify-between border-t border-border-subtle bg-surface-card py-3 ${cellPadClass}`}>
           <Button
             variant="ghost"
-            className="!px-2 !py-1"
+            className="datatable-page-btn !min-h-9 !px-2 !py-1"
             disabled={currentPage <= 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             aria-label="Previous page"
@@ -175,10 +184,10 @@ export function DataTable({
                 key={n}
                 type="button"
                 onClick={() => setPage(n)}
-                className={`min-w-8 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                className={`datatable-page-btn min-w-8 rounded-full px-2 py-1 text-xs font-medium transition-colors ${
                   n === currentPage
-                    ? "bg-accent-amber text-surface-deep"
-                    : "text-text-secondary hover:bg-surface-card-hover hover:text-text-primary"
+                    ? "bg-[var(--selection-tint)] text-accent-amber"
+                    : "text-text-secondary hover:bg-[var(--bg-card-hover)] hover:text-text-primary"
                 }`}
               >
                 {n}
@@ -187,7 +196,7 @@ export function DataTable({
           </div>
           <Button
             variant="ghost"
-            className="!px-2 !py-1"
+            className="datatable-page-btn !min-h-9 !px-2 !py-1"
             disabled={currentPage >= totalPages}
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             aria-label="Next page"

@@ -2,7 +2,7 @@
 
 namespace App\Services\FedEx;
 
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -14,7 +14,7 @@ class AddressValidationService
     ) {}
 
     /**
-     * @param  array<int, array{streetLines: array<int, string>, countryCode: string, city?: string, stateOrProvinceCode?: string, postalCode?: string}>  $addresses
+     * @param  array<int, array{streetLines: array<int, string>, countryCode: string, city?: string, stateOrProvinceCode?: string, postalCode?: string, clientReferenceId?: string}>  $addresses
      * @return array{
      *   resolvedAddresses: array<int, mixed>,
      *   alerts: array<int, string>,
@@ -58,7 +58,12 @@ class AddressValidationService
                     $addr['postalCode'] = (string) $row['postalCode'];
                 }
 
-                return ['address' => $addr];
+                $item = ['address' => $addr];
+                if (isset($row['clientReferenceId']) && is_string($row['clientReferenceId']) && trim($row['clientReferenceId']) !== '') {
+                    $item['clientReferenceId'] = $row['clientReferenceId'];
+                }
+
+                return $item;
             }, $addresses),
         ];
 
@@ -72,7 +77,7 @@ class AddressValidationService
             throw $e;
         }
 
-        $response = Http::timeout($timeout)
+        $response = FedExHttp::pending($timeout)
             ->asJson()
             ->withHeaders([
                 'x-locale' => 'en_US',
@@ -90,7 +95,22 @@ class AddressValidationService
                 'http_status' => $response->status(),
                 'body' => $snippet,
             ]);
-            throw new RuntimeException('FedEx address validation request failed (HTTP '.$response->status().').');
+            $normalizedErrors = $this->normalizeFedExHttpErrorList($body);
+            $message = $this->firstFedExErrorMessage($normalizedErrors, $body, $response->status());
+            $httpStatus = $response->status();
+            $clientStatus = ($httpStatus >= 400 && $httpStatus < 500) ? 422 : 502;
+
+            $payload = [
+                'message' => $message,
+                'fedex_http_status' => $httpStatus,
+                'fedex_errors' => $normalizedErrors,
+                'transaction_id' => $body['transactionId'] ?? null,
+            ];
+            if ($normalizedErrors === []) {
+                $payload['fedex_response_preview'] = $snippet;
+            }
+
+            throw new HttpResponseException(response()->json($payload, $clientStatus));
         }
 
         $output = is_array($body['output'] ?? null) ? $body['output'] : [];
@@ -187,6 +207,7 @@ class AddressValidationService
             'STANDARDIZED.ADDRESS.NOTFOUND' => 'FedEx could not standardize this address.',
             'DATESTAMP.FORMAT.INVALID' => 'The in-effect date format is invalid.',
             'ACCOUNTVERIFICATION.ACCOUNT.NOTFOUND' => 'FedEx reports this account is not shippable.',
+            'VIRTUAL.RESPONSE' => 'FedEx sandbox uses virtualized Address Validation: responses are predefined and your payload may not match the sample transactions. Use the JSON API Collection sample bodies from the FedEx Address Validation docs, or test against production. See the FedEx Developer Portal “API Sandbox Virtualization” guide.',
             default => $code !== '' ? 'FedEx error: '.$code : '',
         };
     }
@@ -290,5 +311,98 @@ class AddressValidationService
         }
 
         return $out;
+    }
+
+    /**
+     * FedEx may return errors as a list, a single associative object, under output.errors, or omit details.
+     *
+     * @return array<int, array{code: string, message: string}>
+     */
+    private function normalizeFedExHttpErrorList(array $body): array
+    {
+        $out = [];
+
+        $append = function (mixed $err) use (&$out): void {
+            if (! is_array($err)) {
+                return;
+            }
+            $code = $err['code'] ?? $err['errorCode'] ?? '';
+            $msg = $err['message'] ?? $err['errorMessage'] ?? $err['localizedMessage'] ?? '';
+            $code = is_string($code) ? $code : (is_scalar($code) ? (string) $code : '');
+            $msg = is_string($msg) ? $msg : (is_scalar($msg) ? (string) $msg : '');
+            if ($code === '' && $msg === '') {
+                return;
+            }
+            $out[] = ['code' => $code, 'message' => $msg];
+        };
+
+        foreach (['errors', 'error'] as $key) {
+            $block = $body[$key] ?? null;
+            if (! is_array($block)) {
+                continue;
+            }
+            if ($block === []) {
+                continue;
+            }
+            if (array_is_list($block)) {
+                foreach ($block as $item) {
+                    $append($item);
+                }
+            } else {
+                $append($block);
+            }
+        }
+
+        $output = $body['output'] ?? null;
+        if (is_array($output)) {
+            foreach (['errors', 'alerts'] as $key) {
+                $block = $output[$key] ?? null;
+                if (! is_array($block) || $block === []) {
+                    continue;
+                }
+                if (array_is_list($block)) {
+                    foreach ($block as $item) {
+                        if (is_array($item)) {
+                            $code = $item['code'] ?? '';
+                            $msg = $item['message'] ?? $item['alertMessage'] ?? '';
+                            $append(['code' => is_string($code) ? $code : '', 'message' => is_string($msg) ? $msg : '']);
+                        }
+                    }
+                } else {
+                    $append($block);
+                }
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<int, array{code: string, message: string}>  $normalizedErrors
+     */
+    private function firstFedExErrorMessage(array $normalizedErrors, array $body, int $httpStatus): string
+    {
+        foreach ($normalizedErrors as $err) {
+            $code = (string) ($err['code'] ?? '');
+            $message = (string) ($err['message'] ?? '');
+            $mapped = $this->mapFedExErrorCode($code);
+            $friendly = $mapped !== '' && $mapped !== 'FedEx error: '.$code;
+
+            if ($friendly) {
+                return $mapped;
+            }
+            if ($message !== '') {
+                return $message;
+            }
+            if ($code !== '' && $mapped !== '') {
+                return $mapped;
+            }
+        }
+
+        if (isset($body['message']) && is_string($body['message']) && $body['message'] !== '') {
+            return $body['message'];
+        }
+
+        return 'FedEx address validation request failed (HTTP '.$httpStatus.').';
     }
 }

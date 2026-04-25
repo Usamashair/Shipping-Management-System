@@ -17,7 +17,7 @@ export function MarketingSidebar() {
           </span>
           <span
             className="text-lg font-bold tracking-tight text-text-primary"
-            style={{ fontFamily: "var(--font-syne), sans-serif" }}
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
           >
             ShipFlow
           </span>

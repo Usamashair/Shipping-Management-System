@@ -12,7 +12,7 @@ export default function ApiHealthDevPage() {
           </Link>
           <h1
             className="mt-4 text-2xl font-bold text-text-primary"
-            style={{ fontFamily: "var(--font-syne), sans-serif" }}
+            style={{ fontFamily: "var(--font-display), sans-serif" }}
           >
             Backend health
           </h1>

@@ -13,6 +13,7 @@ function pageTitleFromPath(pathname: string): string {
   if (pathname.startsWith("/admin/settings")) return "Settings";
   if (pathname.startsWith("/customer/shipments/new")) return "New Shipment";
   if (pathname.startsWith("/customer/shipments")) return "My Shipments";
+  if (pathname.startsWith("/customer/tracking")) return "Track shipments";
   if (pathname.startsWith("/customer/profile")) return "Profile";
   if (pathname.startsWith("/dev/api-health")) return "API Health";
   return "ShipFlow";
@@ -27,49 +28,45 @@ export function Header() {
 
   return (
     <header
+      className="dashboard-header"
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
         height: "var(--header-height)",
-        background: "rgba(6,10,16,0.85)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        background: "var(--header-bg)",
         borderBottom: "1px solid var(--border-subtle)",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "0 2rem",
-        zIndex: 99,
+        padding: `0 var(--ds-container-margin)`,
+        gap: 16,
+        boxShadow: "0 1px 0 rgba(15, 23, 42, 0.04)",
       }}
-      className="md:left-[var(--sidebar-width)]"
     >
-      <div>
+      <div className="min-w-0">
         <h1
           style={{
-            fontFamily: "Outfit, var(--font-display), sans-serif",
-            fontSize: 18,
+            fontFamily: "var(--font-display), sans-serif",
+            fontSize: 20,
             fontWeight: 700,
             color: "var(--text-primary)",
-            lineHeight: 1,
+            lineHeight: 1.25,
+            letterSpacing: "-0.02em",
           }}
         >
           {pageTitle}
         </h1>
-        <p style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)" }}>
+        <p style={{ marginTop: 4, fontSize: 12, color: "var(--text-muted)" }}>
           ShipFlow / {pageTitle}
         </p>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div className="relative hidden sm:block">
+        <div className="relative hidden min-w-0 sm:block">
           <Search
-            size={15}
+            size={16}
             aria-hidden
             style={{
               position: "absolute",
-              left: 12,
+              left: 14,
               top: "50%",
               transform: "translateY(-50%)",
               color: "var(--text-muted)",
@@ -80,26 +77,20 @@ export function Header() {
             type="search"
             placeholder="Search…"
             aria-label="Search"
-            className="placeholder:text-text-muted"
+            className="header-search-input placeholder:text-text-muted"
             onFocus={() => setSearchFocus(true)}
             onBlur={() => setSearchFocus(false)}
             style={{
-              width: searchFocus ? 260 : 200,
-              height: 36,
+              width: searchFocus ? 280 : 220,
+              maxWidth: "min(280px, 36vw)",
+              height: 40,
               background: "var(--bg-card)",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              padding: "0 12px 0 36px",
+              border: `1px solid ${searchFocus ? "var(--brand-primary)" : "var(--border-default)"}`,
+              borderRadius: 9999,
               color: "var(--text-primary)",
-              fontSize: 13,
               outline: "none",
+              boxShadow: searchFocus ? "0 0 0 3px var(--amber-glow)" : "none",
               transition: "width 0.2s ease, border-color 0.18s ease, box-shadow 0.18s ease",
-              ...(searchFocus
-                ? {
-                    borderColor: "var(--amber)",
-                    boxShadow: "0 0 0 3px var(--amber-dim)",
-                  }
-                : {}),
             }}
           />
         </div>
@@ -107,10 +98,10 @@ export function Header() {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative border-0"
+          className="icon-only-btn relative border-0"
           style={{
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             borderRadius: "var(--radius-md)",
             background: "var(--bg-card)",
             border: "1px solid var(--border-default)",
@@ -119,50 +110,64 @@ export function Header() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            transition: "border-color 0.18s ease, color 0.18s ease",
+            transition: "border-color 0.18s ease, color 0.18s ease, background 0.18s ease",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = "var(--border-strong)";
             e.currentTarget.style.color = "var(--text-primary)";
+            e.currentTarget.style.background = "var(--bg-card-hover)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = "var(--border-default)";
             e.currentTarget.style.color = "var(--text-secondary)";
+            e.currentTarget.style.background = "var(--bg-card)";
           }}
         >
-          <Bell size={16} aria-hidden />
+          <Bell size={18} aria-hidden />
+          <span
+            className="absolute right-2 top-2 h-2 w-2 rounded-full"
+            style={{ background: "var(--brand-primary)" }}
+            aria-hidden
+          />
         </button>
 
         <div
           style={{
-            height: 36,
+            height: 40,
             borderRadius: "var(--radius-md)",
             background: "var(--bg-card)",
             border: "1px solid var(--border-default)",
-            padding: "0 12px",
+            padding: "0 12px 0 10px",
             gap: 8,
-            display: "flex",
+            display: "none",
             alignItems: "center",
           }}
+          className="sm:flex"
         >
           <div
             style={{
-              width: 24,
-              height: 24,
+              width: 28,
+              height: 28,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, var(--amber), var(--amber-light))",
+              background: "var(--selection-tint)",
+              border: "1px solid var(--border-subtle)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#000",
-              fontSize: 11,
+              color: "var(--brand-primary)",
+              fontSize: 12,
               fontWeight: 700,
             }}
           >
             {displayName.charAt(0).toUpperCase()}
           </div>
-          <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>{displayName}</span>
-          <ChevronDown size={12} style={{ color: "var(--text-muted)" }} aria-hidden />
+          <span
+            className="max-w-[140px] truncate"
+            style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)" }}
+          >
+            {displayName}
+          </span>
+          <ChevronDown size={14} style={{ color: "var(--text-muted)" }} aria-hidden />
         </div>
       </div>
     </header>

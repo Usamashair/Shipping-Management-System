@@ -4,6 +4,9 @@ namespace App\Services\FedEx;
 
 class FedExShipErrorMapper
 {
+    /** User-facing message when FedEx rejects input (do not surface raw FedEx text in API `message`). */
+    public const GENERIC_INVALID_INPUT_MESSAGE = 'Shipment cannot be created. Please verify address and service details.';
+
     public static function mapCode(?string $code): string
     {
         if ($code === null || $code === '') {
@@ -16,6 +19,7 @@ class FedExShipErrorMapper
             'SHIPMENT.SERVICETYPE.INVALID' => 'Selected service is not available for this route.',
             'WEIGHT.VALUE.INVALID' => 'Invalid package weight.',
             'SHIPMENT.PACKAGEDIMENSION.INVALID' => 'Invalid package dimensions.',
+            'INVALID.INPUT.EXCEPTION' => self::GENERIC_INVALID_INPUT_MESSAGE,
             default => 'FedEx error: '.$code,
         };
     }
@@ -32,6 +36,14 @@ class FedExShipErrorMapper
                 continue;
             }
             $code = isset($err['code']) ? (string) $err['code'] : '';
+            if ($code === 'INVALID.INPUT.EXCEPTION') {
+                $mapped = self::mapCode($code);
+                if ($mapped !== '') {
+                    $out[] = $mapped;
+                }
+
+                continue;
+            }
             $base = self::mapCode($code);
             if (isset($err['message']) && is_string($err['message']) && $err['message'] !== '') {
                 $base = $base !== '' && ! str_contains($base, $err['message'])

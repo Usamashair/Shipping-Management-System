@@ -65,7 +65,7 @@ export function ApiHealthStatus() {
   const statusPill = useCallback(() => {
     if (state === "loading") {
       return (
-        <span className="rounded-full bg-surface-deep px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+        <span className="rounded-full bg-surface-card-hover px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
           Checking
         </span>
       );
@@ -100,7 +100,7 @@ export function ApiHealthStatus() {
   }, [rawJson]);
 
   return (
-    <div className="w-full rounded-2xl border border-border-default bg-surface-card p-5 shadow-card ring-1 ring-white/[0.04]">
+    <div className="w-full rounded-2xl border border-border-default bg-surface-card p-5 shadow-card ring-1 ring-slate-900/[0.04]">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--accent-amber-glow)] ring-1 ring-accent-amber/20">
           <Activity className="h-5 w-5 text-accent-amber" aria-hidden />
@@ -176,7 +176,7 @@ export function ApiHealthStatus() {
                 <Copy className="h-3.5 w-3.5" />
                 {copied ? "Copied" : "Copy"}
               </Button>
-              <pre className="mono max-h-56 overflow-auto rounded-lg border border-border-default bg-surface-deep p-3 pr-24 pt-10 text-xs leading-relaxed text-text-secondary tabular-nums">
+              <pre className="mono max-h-56 overflow-auto rounded-lg border border-border-default bg-surface-card-hover p-3 pr-24 pt-10 text-xs leading-relaxed text-text-secondary tabular-nums">
                 {rawJson}
               </pre>
             </div>

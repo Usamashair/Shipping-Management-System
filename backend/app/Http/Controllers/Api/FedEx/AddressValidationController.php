@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\FedEx;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ValidateFedExAddressRequest;
 use App\Services\FedEx\AddressValidationService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -37,6 +38,8 @@ class AddressValidationController extends Controller
                 'fedex_transaction_id' => $data['fedex_transaction_id'],
                 'fedex_customer_transaction_id' => $data['fedex_customer_transaction_id'],
             ]);
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (Throwable $e) {
             Log::error('FedEx address validation failed.', [
                 'message' => $e->getMessage(),

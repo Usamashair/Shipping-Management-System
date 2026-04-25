@@ -27,7 +27,7 @@ const styleVars: Record<
     pulse: true,
   },
   delivered: {
-    fg: "var(--status-delivered-fg)",
+    fg: "var(--status-delivered-text)",
     bg: "var(--status-delivered-bg)",
     dot: false,
   },
@@ -42,7 +42,7 @@ const styleVars: Record<
     dot: false,
   },
   cancelled: {
-    fg: "var(--status-cancelled-fg)",
+    fg: "var(--status-cancelled-text)",
     bg: "var(--status-cancelled-bg)",
     dot: false,
   },
@@ -56,21 +56,23 @@ export function StatusBadge({
   size?: "default" | "lg";
 }) {
   const cfg = styleVars[status];
-  const textSize = size === "lg" ? "text-xs" : "text-[11px]";
-  const pad = size === "lg" ? "px-2.5 py-1" : "px-2 py-0.5";
+  const textSize = size === "lg" ? "text-xs" : "text-[12px]";
+  const pad = size === "lg" ? "px-2.5 py-1" : "px-2.5 py-1";
 
   return (
     <span
-      className={`mono inline-flex items-center gap-1.5 rounded font-semibold uppercase tracking-wider tabular-nums ${textSize} ${pad}`}
+      className={`mono inline-flex items-center gap-1.5 rounded-[5px] font-semibold uppercase tracking-[0.06em] tabular-nums ${textSize} ${pad}`}
       style={{
         color: cfg.fg,
         backgroundColor: cfg.bg,
-        letterSpacing: "0.08em",
+        lineHeight: 1.4,
+        boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${cfg.fg} 22%, transparent)`,
+        whiteSpace: "nowrap",
       }}
     >
       {cfg.dot ? (
         <span
-          className={`h-1.5 w-1.5 shrink-0 rounded-full ${cfg.pulse ? "animate-pulse-dot motion-reduce:animate-none" : ""}`}
+          className={`h-[7px] w-[7px] shrink-0 rounded-full ${cfg.pulse ? "animate-pulse-dot motion-reduce:animate-none" : ""}`}
           style={{ backgroundColor: cfg.fg }}
           aria-hidden
         />

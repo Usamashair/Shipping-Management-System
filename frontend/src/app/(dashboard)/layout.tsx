@@ -1,10 +1,12 @@
 "use client";
 
 import { ApiStoreProvider } from "@/lib/api/store";
+import { AddressBanner } from "@/components/shipping/AddressBanner";
 import { Footer } from "@/components/shipping/Footer";
 import { Header } from "@/components/shipping/Header";
 import { LoadingScreen } from "@/components/shipping/loading-screen";
 import { Sidebar } from "@/components/shipping/Sidebar";
+import { ProfileProvider } from "@/lib/context/ProfileContext";
 import { useAuth } from "@/lib/auth/context";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
@@ -28,24 +30,24 @@ function DashboardGate({ children }: { children: ReactNode }) {
     return null;
   }
 
-  return <ApiStoreProvider>{children}</ApiStoreProvider>;
+  return (
+    <ApiStoreProvider>
+      <ProfileProvider>{children}</ProfileProvider>
+    </ApiStoreProvider>
+  );
 }
 
 function DashboardShell({ children }: { children: ReactNode }) {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ minHeight: "100vh" }}>
       <Sidebar />
-      <div className="flex min-h-screen w-full flex-col pb-[70px] md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] md:pb-0">
+      <div className="dashboard-content-column">
         <Header />
-        <main
-          style={{
-            flex: 1,
-            padding: "2rem",
-            paddingTop: "calc(var(--header-height) + 2rem)",
-            overflowY: "auto",
-          }}
-        >
-          <div className="page-enter">{children}</div>
+        <main className="dashboard-main">
+          <div className="page-enter">
+            <AddressBanner />
+            {children}
+          </div>
         </main>
         <Footer />
       </div>

@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Services\FedEx\AddressValidationService;
 use App\Services\FedEx\FedExOAuthToken;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -101,5 +102,89 @@ class AddressValidationServiceTest extends TestCase
         ]);
 
         $this->assertFalse($result['results'][0]['isValid']);
+    }
+
+    public function test_validate_addresses_includes_client_reference_id_in_payload_when_provided(): void
+    {
+        Http::fake(function (Request $request) {
+            if (str_contains($request->url(), '/oauth/token')) {
+                return Http::response([
+                    'access_token' => 'unit-test-token',
+                    'token_type' => 'bearer',
+                    'expires_in' => 3600,
+                ], 200);
+            }
+
+            $data = json_decode($request->body(), true);
+            $this->assertIsArray($data);
+            $this->assertSame('CORR-999', $data['addressesToValidate'][0]['clientReferenceId'] ?? null);
+
+            return Http::response([
+                'output' => [
+                    'resolvedAddresses' => [
+                        [
+                            'addressState' => 'Standardized',
+                            'deliveryPointValidationRollup' => 'CONFIRMED',
+                            'address' => [
+                                'streetLines' => ['123 Main St'],
+                                'countryCode' => 'US',
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200);
+        });
+
+        $service = new AddressValidationService(new FedExOAuthToken);
+
+        $result = $service->validateAddresses([
+            [
+                'streetLines' => ['123 Main St'],
+                'countryCode' => 'US',
+                'clientReferenceId' => 'CORR-999',
+            ],
+        ]);
+
+        $this->assertTrue($result['results'][0]['isValid']);
+    }
+
+    public function test_validate_addresses_second_argument_sets_in_effect_as_of_timestamp(): void
+    {
+        Http::fake(function (Request $request) {
+            if (str_contains($request->url(), '/oauth/token')) {
+                return Http::response([
+                    'access_token' => 'unit-test-token',
+                    'token_type' => 'bearer',
+                    'expires_in' => 3600,
+                ], 200);
+            }
+
+            $data = json_decode($request->body(), true);
+            $this->assertIsArray($data);
+            $this->assertSame('2019-09-06', $data['inEffectAsOfTimestamp'] ?? null);
+
+            return Http::response([
+                'output' => [
+                    'resolvedAddresses' => [
+                        [
+                            'addressState' => 'Standardized',
+                            'deliveryPointValidationRollup' => 'CONFIRMED',
+                            'address' => [
+                                'streetLines' => ['7372 PARKRIDGE BLVD'],
+                                'countryCode' => 'US',
+                            ],
+                        ],
+                    ],
+                ],
+            ], 200);
+        });
+
+        $service = new AddressValidationService(new FedExOAuthToken);
+
+        $result = $service->validateAddresses([
+            ['streetLines' => ['7372 PARKRIDGE BLVD'], 'countryCode' => 'US'],
+        ], '2019-09-06');
+
+        $this->assertTrue($result['results'][0]['isValid']);
     }
 }

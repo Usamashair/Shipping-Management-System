@@ -25,6 +25,7 @@ class ValidateFedExAddressRequest extends FormRequest
             'addresses.*.city' => ['nullable', 'string', 'max:120'],
             'addresses.*.stateOrProvinceCode' => ['nullable', 'string', 'max:32'],
             'addresses.*.postalCode' => ['nullable', 'string', 'max:32'],
+            'addresses.*.clientReferenceId' => ['nullable', 'string', 'max:128'],
         ];
     }
 }

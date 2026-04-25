@@ -3,7 +3,6 @@
 namespace App\Services\FedEx;
 
 use App\Contracts\FedEx\FedExClient;
-use Illuminate\Support\Facades\Http;
 use LogicException;
 
 class RestFedExClient implements FedExClient
@@ -38,7 +37,7 @@ class RestFedExClient implements FedExClient
         $base = rtrim((string) config('fedex.base_url'), '/');
         $timeout = (int) config('fedex.http_timeout', 30);
 
-        $response = Http::timeout($timeout)
+        $response = FedExHttp::pending($timeout)
             ->asJson()
             ->withToken($token)
             ->post($base.'/track/v1/trackingnumbers', [

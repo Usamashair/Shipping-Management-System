@@ -8,17 +8,27 @@ import {
   LogOut,
   Package,
   PlusCircle,
+  Search,
+  Settings,
+  UserCircle,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
+import { useProfile } from "@/lib/context/ProfileContext";
 
 type NavItem = { href: string; icon: LucideIcon; label: string };
 
 function isNavActive(pathname: string, href: string) {
   if (pathname === href) return true;
-  if (href !== "/admin" && href !== "/customer/shipments" && pathname.startsWith(href)) {
+  if (
+    href !== "/admin" &&
+    href !== "/customer/shipments" &&
+    href !== "/customer/tracking" &&
+    href !== "/customer/profile" &&
+    pathname.startsWith(href)
+  ) {
     return true;
   }
   return false;
@@ -37,31 +47,29 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
         display: "flex",
         alignItems: "center",
         gap: "12px",
-        padding: "10px 20px",
+        minHeight: "40px",
+        padding: "10px 16px",
         margin: "2px 10px",
         borderRadius: "var(--radius-md)",
         fontSize: "14px",
         fontWeight: 500,
         textDecoration: "none",
-        transition: "all 0.18s ease",
-        color: active ? "var(--amber)" : hover ? "var(--text-primary)" : "var(--text-secondary)",
-        background: active ? "var(--amber-dim)" : hover ? "var(--bg-card)" : "transparent",
-        border: active ? "1px solid var(--border-accent)" : "1px solid transparent",
+        transition: "background 0.18s ease, color 0.18s ease, border-color 0.18s ease",
+        borderLeft: active ? "4px solid var(--selection-bar)" : "4px solid transparent",
+        color: active ? "var(--brand-primary)" : hover ? "var(--text-primary)" : "var(--text-secondary)",
+        background: active ? "var(--selection-tint)" : hover ? "var(--bg-card-hover)" : "transparent",
       }}
     >
-      <item.icon size={17} style={{ flexShrink: 0 }} aria-hidden />
+      <item.icon
+        size={20}
+        strokeWidth={active ? 2 : 1.75}
+        style={{
+          flexShrink: 0,
+          color: active ? "var(--brand-primary)" : "var(--text-muted)",
+        }}
+        aria-hidden
+      />
       <span>{item.label}</span>
-      {active ? (
-        <div
-          style={{
-            marginLeft: "auto",
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "var(--amber)",
-          }}
-        />
-      ) : null}
     </Link>
   );
 }
@@ -72,9 +80,9 @@ function MobileNavLink({ item, pathname }: { item: NavItem; pathname: string }) 
     <Link
       href={item.href}
       title={item.label}
-      className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[10px] font-medium no-underline"
+      className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-[11px] font-medium no-underline"
       style={{
-        color: active ? "var(--amber)" : "var(--text-secondary)",
+        color: active ? "var(--brand-primary)" : "var(--text-secondary)",
       }}
     >
       <item.icon size={20} strokeWidth={active ? 2.25 : 2} aria-hidden />
@@ -86,16 +94,20 @@ function MobileNavLink({ item, pathname }: { item: NavItem; pathname: string }) 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { profile, profileLoading } = useProfile();
 
   const adminNav: NavItem[] = [
     { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/admin/shipments", icon: Package, label: "Shipments" },
     { href: "/admin/users", icon: Users, label: "Users" },
+    { href: "/admin/settings", icon: Settings, label: "Settings" },
     { href: "/dev/api-health", icon: Activity, label: "API Health" },
   ];
 
   const customerNav: NavItem[] = [
     { href: "/customer/shipments", icon: Package, label: "My Shipments" },
+    { href: "/customer/profile", icon: UserCircle, label: "My Profile" },
+    { href: "/customer/tracking", icon: Search, label: "Track" },
     { href: "/customer/shipments/new", icon: PlusCircle, label: "New Shipment" },
   ];
 
@@ -103,17 +115,28 @@ export function Sidebar() {
   const isAdmin = user?.role === "admin";
   const displayName = user?.name?.trim() || user?.email || "User";
 
-  const badgeStyle: CSSProperties = isAdmin
-    ? {
-        background: "var(--amber-dim)",
-        color: "var(--amber)",
-        border: "1px solid var(--border-accent)",
-      }
-    : {
-        background: "var(--blue-dim)",
-        color: "var(--blue)",
-        border: "1px solid rgba(59,130,246,0.3)",
-      };
+  const hasAddr = Boolean(profile?.has_address ?? user?.has_address);
+  const addressVerified = Boolean(
+    profile?.address_fedex_verified ?? user?.address_fedex_verified,
+  );
+  let addressStatusLine: string;
+  if (isAdmin) {
+    addressStatusLine = "Administrator";
+  } else if (profileLoading && user?.has_address == null) {
+    addressStatusLine = "Loading address…";
+  } else if (!hasAddr) {
+    addressStatusLine = "No saved address";
+  } else if (addressVerified) {
+    addressStatusLine = "Address verified";
+  } else {
+    addressStatusLine = "Address saved";
+  }
+
+  const badgeStyle: CSSProperties = {
+    background: "var(--selection-tint)",
+    color: "var(--brand-primary)",
+    border: "1px solid var(--border-accent)",
+  };
 
   return (
     <>
@@ -137,7 +160,8 @@ export function Sidebar() {
             height: "var(--header-height)",
             display: "flex",
             alignItems: "center",
-            padding: "0 20px",
+            gap: 12,
+            padding: "0 var(--ds-card-padding)",
             borderBottom: "1px solid var(--border-subtle)",
             flexShrink: 0,
           }}
@@ -152,29 +176,29 @@ export function Sidebar() {
           >
             <path
               d="M20 7L12 3L4 7M20 7V17L12 21M20 7L12 11M4 7V17L12 21M4 7L12 11M12 11V21"
-              stroke="var(--amber)"
+              stroke="var(--brand-primary)"
               strokeWidth="2"
               strokeLinecap="round"
             />
           </svg>
           <span
             style={{
-              fontFamily: "Outfit, var(--font-display), sans-serif",
+              fontFamily: "var(--font-display), sans-serif",
               fontWeight: 700,
               fontSize: 18,
               color: "var(--text-primary)",
-              marginLeft: 10,
+              letterSpacing: "-0.02em",
             }}
           >
             ShipFlow
           </span>
         </div>
 
-        <div style={{ padding: "16px 20px 8px" }}>
+        <div style={{ padding: "16px var(--ds-card-padding) 12px" }}>
           <span
             style={{
-              borderRadius: 20,
-              padding: "3px 10px",
+              borderRadius: 9999,
+              padding: "6px 14px",
               fontSize: 11,
               fontWeight: 600,
               textTransform: "uppercase",
@@ -199,18 +223,18 @@ export function Sidebar() {
 
         <div
           style={{
-            padding: "8px 20px 6px",
-            fontSize: 10,
+            padding: "8px var(--ds-card-padding) 8px",
+            fontSize: 11,
             fontWeight: 600,
             textTransform: "uppercase",
             letterSpacing: "0.12em",
             color: "var(--text-muted)",
           }}
         >
-          MENU
+          Menu
         </div>
 
-        <nav className="flex flex-col">
+        <nav className="flex flex-col pb-2">
           {items.map((item) => (
             <NavLink key={item.href} item={item} pathname={pathname} />
           ))}
@@ -220,28 +244,27 @@ export function Sidebar() {
 
         <div
           style={{
-            margin: 12,
-            padding: 12,
-            background: "var(--bg-card)",
-            borderRadius: "var(--radius-md)",
+            margin: "var(--space-4)",
+            padding: "var(--space-4)",
+            background: "var(--bg-card-hover)",
+            borderRadius: "var(--radius-lg)",
             border: "1px solid var(--border-subtle)",
             display: "flex",
             alignItems: "center",
-            gap: 10,
+            gap: 12,
           }}
         >
           <div
             style={{
-              width: 32,
-              height: 32,
+              width: 36,
+              height: 36,
               borderRadius: "50%",
-              background: isAdmin
-                ? "linear-gradient(135deg, var(--amber), var(--amber-light))"
-                : "linear-gradient(135deg, var(--blue), #60a5fa)",
+              background: "var(--selection-tint)",
+              border: "1px solid var(--border-subtle)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#fff",
+              color: "var(--brand-primary)",
               fontWeight: 700,
               fontSize: 13,
               flexShrink: 0,
@@ -252,7 +275,7 @@ export function Sidebar() {
           <div className="min-w-0 flex-1">
             <p
               style={{
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: 600,
                 color: "var(--text-primary)",
                 overflow: "hidden",
@@ -262,26 +285,26 @@ export function Sidebar() {
             >
               {displayName}
             </p>
-            <p style={{ fontSize: 11, color: "var(--text-muted)" }}>{isAdmin ? "Administrator" : "Customer"}</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)" }}>{addressStatusLine}</p>
           </div>
           <button
             type="button"
             onClick={() => void logout()}
             aria-label="Log out"
-            className="border-0 bg-transparent p-0"
+            className="icon-only-btn border-0 bg-transparent p-0"
             style={{
               marginLeft: "auto",
               color: "var(--text-muted)",
               cursor: "pointer",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--red)";
+              e.currentTarget.style.color = "var(--accent-red)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = "var(--text-muted)";
             }}
           >
-            <LogOut size={16} />
+            <LogOut size={18} />
           </button>
         </div>
       </aside>

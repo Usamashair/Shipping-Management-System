@@ -116,12 +116,12 @@ function ShellNavLinks({
                 href={item.href}
                 className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ease-out ${
                   active
-                    ? "border-l-[3px] border-[var(--accent-amber)] bg-[var(--accent-amber-glow)] text-[var(--accent-amber-bright)] shadow-[inset_0_0_20px_rgba(245,158,11,0.06)]"
-                    : "border-l-[3px] border-transparent text-[var(--text-secondary)] hover:border-[var(--border-accent)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]"
+                    ? "border-l-[4px] border-[var(--brand-primary)] bg-[var(--selection-tint)] text-[var(--brand-primary)]"
+                    : "border-l-[4px] border-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 <Icon
-                  className={`h-5 w-5 shrink-0 ${active ? "text-[var(--accent-amber)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"}`}
+                  className={`h-5 w-5 shrink-0 ${active ? "text-[var(--brand-primary)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"}`}
                   aria-hidden
                 />
                 {item.label}
@@ -173,18 +173,18 @@ export function AppShell({
     <div className="min-h-screen bg-surface-deep text-text-primary">
       {/* Desktop sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-40 hidden h-full w-60 flex-col border-r border-border-default bg-surface-raised md:flex`}
+        className={`fixed left-0 top-0 z-40 hidden h-full w-[var(--sidebar-width)] flex-col border-r border-border-subtle bg-surface-card md:flex`}
         aria-label="Main navigation"
       >
         <div className="border-b border-border-default px-4 py-5">
           <Link href="/" className="flex items-center gap-3">
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent-amber-glow)]">
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--selection-tint)]">
               <Package
                 className="h-5 w-5 text-accent-amber animate-float motion-reduce:animate-none"
                 aria-hidden
               />
             </span>
-            <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "var(--font-syne), sans-serif" }}>
+            <span className="text-lg font-bold tracking-tight" style={{ fontFamily: "var(--font-display), sans-serif" }}>
               ShipFlow
             </span>
           </Link>
@@ -192,8 +192,8 @@ export function AppShell({
             <span
               className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${
                 portal === "admin"
-                  ? "bg-[var(--accent-amber-glow)] text-[var(--accent-amber-bright)]"
-                  : "bg-[rgba(59,130,246,0.15)] text-[var(--accent-blue)]"
+                  ? "bg-[var(--selection-tint)] text-[var(--brand-primary)]"
+                  : "bg-[var(--blue-dim)] text-[var(--accent-blue)]"
               }`}
             >
               {portal === "admin" ? "Admin panel" : "Customer portal"}
@@ -210,7 +210,7 @@ export function AppShell({
           </div>
           {user ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--border-accent)] text-xs font-semibold text-text-primary">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border-subtle bg-[var(--selection-tint)] text-xs font-semibold text-accent-amber">
                 {initials(user.name)}
               </div>
               <div className="min-w-0 flex-1">
@@ -230,7 +230,7 @@ export function AppShell({
               router.replace("/login");
               router.refresh();
             }}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-border-default py-2 text-sm font-medium text-text-secondary transition-all duration-200 hover:border-[var(--accent-amber)] hover:text-text-primary"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-border-default py-2 text-sm font-medium text-text-secondary transition-all duration-200 hover:border-[var(--brand-primary)] hover:text-text-primary"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             Log out
@@ -252,12 +252,12 @@ export function AppShell({
           aria-label="Close menu"
         />
         <div
-          className={`absolute left-0 top-0 flex h-full w-60 max-w-[85vw] flex-col bg-surface-raised shadow-card transition-transform duration-200 ease-out ${
+          className={`absolute left-0 top-0 flex h-full w-[var(--sidebar-width)] max-w-[85vw] flex-col bg-surface-card shadow-card transition-transform duration-200 ease-out ${
             mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex items-center justify-between border-b border-border-default px-3 py-3">
-            <span className="text-base font-bold" style={{ fontFamily: "var(--font-syne), sans-serif" }}>
+            <span className="text-base font-bold" style={{ fontFamily: "var(--font-display), sans-serif" }}>
               ShipFlow
             </span>
             <button
@@ -276,8 +276,8 @@ export function AppShell({
       </div>
 
       {/* Top header */}
-      <header className="fixed left-0 right-0 top-0 z-30 flex h-16 items-center border-b border-border-default bg-[var(--header-bg)] backdrop-blur-xl md:left-60">
-        <div className="flex w-full items-center gap-3 px-4 md:px-6">
+      <header className="fixed left-0 right-0 top-0 z-30 flex h-16 items-center border-b border-border-subtle bg-[var(--header-bg)] md:left-[var(--sidebar-width)]">
+        <div className="flex w-full items-center gap-3 px-[var(--ds-container-margin)]">
           <button
             type="button"
             className="rounded-lg p-2 text-text-secondary hover:bg-surface-card-hover hover:text-text-primary md:hidden"
@@ -289,7 +289,7 @@ export function AppShell({
           <div className="min-w-0 flex-1">
             <h1
               className="truncate text-xl font-bold tracking-tight text-text-primary md:text-2xl"
-              style={{ fontFamily: "var(--font-syne), sans-serif" }}
+              style={{ fontFamily: "var(--font-display), sans-serif" }}
             >
               {pageTitle}
             </h1>
@@ -320,7 +320,7 @@ export function AppShell({
                   onChange={(e) => onSearchChange(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
-                  className="w-full rounded-lg border border-border-default bg-surface-card py-2 pl-8 pr-3 text-sm text-text-primary placeholder:text-text-muted transition-all duration-200 focus:border-accent-amber focus:outline-none focus:ring-[3px] focus:ring-[var(--accent-amber-glow)]"
+                  className="w-full rounded-full border border-border-default bg-surface-card py-2 pl-8 pr-3 text-sm text-text-primary placeholder:text-text-muted transition-all duration-200 focus:border-accent-amber focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
                 />
               </div>
             ) : null}
@@ -334,10 +334,9 @@ export function AppShell({
       </header>
 
       {/* Main */}
-      <main className="min-h-screen pb-20 pt-16 md:pb-0 md:pl-60">
+      <main className="min-h-screen pb-20 pt-16 md:pb-0 md:pl-[var(--sidebar-width)]">
         <div className="relative flex min-h-[calc(100vh-4rem)] flex-col">
-          <div className="pointer-events-none absolute inset-0 dot-grid-overlay" />
-          <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-5 py-6 md:px-8 md:py-8">
+          <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-[var(--ds-container-margin)] py-[var(--ds-container-margin)]">
             <div className="main-stage-animate motion-reduce:opacity-100 motion-reduce:transform-none flex-1">
               {children}
             </div>
@@ -373,7 +372,7 @@ export function AppShell({
                 : "text-text-muted"
             }`}
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-amber text-surface-deep">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-amber text-white">
               <PlusCircle className="h-4 w-4" />
             </span>
             New

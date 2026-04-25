@@ -1,0 +1,439 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "meta": {
+    "name": "Shipment Management System — UI Design System",
+    "version": "1.0.0",
+    "intent": "High-level creative direction and component vocabulary so AI and engineers can replicate a modern, light enterprise dashboard: soft UI, teal accent, airy whitespace, and calm semantic status colors.",
+    "references": {
+      "screens": [
+        "Quotation / shipment detail — card-led two-column layout with charge summary and donut visualization",
+        "Quotes list — tabbed table view with pill search, filters, and primary CTA",
+        "Shipment / quote workspace — three-column shell with sidebar, main, and right rail"
+      ]
+    }
+  },
+  "creative_direction": {
+    "personality": "Calm, trustworthy, operational clarity over decoration. Feels like a polished internal tool or B2B SaaS dashboard.",
+    "visual_style": "Soft UI / glassmorphism-lite without heavy blur: white surfaces on cool gray canvas, subtle elevation, rounded geometry, thin outline icons, restrained color.",
+    "information_design": "Strong hierarchy: IDs and money read largest; labels are smaller and cooler; metadata is smallest and most muted. Prefer scanning patterns: F-pattern in forms, Z-pattern in headers.",
+    "density": "Comfortable, not compact. Default to generous padding; tighten only inside dense tables.",
+    "photography_and_illustration": "None by default. Use simple charts (donut) and avatars only where they aid recognition."
+  },
+  "design_principles": [
+    {
+      "name": "Clarity first",
+      "guidance": "High contrast for primary text on white; never rely on color alone for meaning—pair status hue with label text."
+    },
+    {
+      "name": "One accent discipline",
+      "guidance": "Teal/cyan is the sole brand accent for interactive emphasis, selection, and primary actions. Charts may use a small controlled palette."
+    },
+    {
+      "name": "Quiet structure",
+      "guidance": "Use whitespace and light dividers before borders. Shadows are soft and rare; borders are 1px hairlines."
+    },
+    {
+      "name": "Consistent geometry",
+      "guidance": "Radii ladder: small controls 6–8px, cards 12–16px, pills/full-round search 9999px."
+    },
+    {
+      "name": "Predictable interaction",
+      "guidance": "Selected rows and active nav share the same language: pale tint + left accent bar + teal icon/text."
+    }
+  ],
+  "layout": {
+    "app_shell": {
+      "pattern": "Fixed left sidebar, fixed top bar, scrollable main content on a tinted page background.",
+      "sidebar": {
+        "width_px": 240,
+        "background": "surface.primary",
+        "border": "1px solid token(colors.border.subtle) on trailing edge",
+        "content": "Logo lockup at top; vertical nav stack; generous vertical rhythm between groups"
+      },
+      "top_bar": {
+        "height_px": 64,
+        "max_height_px": 72,
+        "background": "surface.primary",
+        "content": "Global pill search (dominant), secondary utilities (locale/currency, notifications), user menu/avatar cluster aligned end",
+        "alignment": "Start: search; End: utilities; vertical center all controls"
+      },
+      "main_canvas": {
+        "background": "surface.canvas",
+        "outer_padding_px": 24,
+        "max_content_width": "fluid with comfortable side padding; avoid ultra-wide single columns without a max-width reader rail"
+      }
+    },
+    "grids": {
+      "detail_page": {
+        "description": "Primary content ~60–70% width; supporting rail ~25–35%. On small screens stack: summary → details → actions.",
+        "column_gap_px": 20,
+        "row_gap_px": 20
+      },
+      "list_page": {
+        "description": "Single primary card containing toolbar (tabs, search, filters, CTA) and table; pagination docked bottom inside card."
+      }
+    },
+    "spacing_scale": {
+      "base_unit_px": 4,
+      "scale": [4, 8, 12, 16, 20, 24, 32, 40],
+      "semantics": {
+        "tight": 8,
+        "control_padding_y": 10,
+        "control_padding_x": 14,
+        "card_padding": 24,
+        "section_gap": 20,
+        "page_section_margin": 32,
+        "container_margin": 24
+      }
+    }
+  },
+  "color": {
+    "mode": "light_only",
+    "brand": {
+      "primary": "#28B4A4",
+      "primary_hover": "#22998B",
+      "primary_muted": "#4FD1C5",
+      "on_primary": "#FFFFFF",
+      "selection_tint": "#E6FFFA",
+      "selection_bar": "#28B4A4"
+    },
+    "surface": {
+      "canvas": "#F4F7F6",
+      "canvas_alt": "#F7FAFC",
+      "primary": "#FFFFFF",
+      "subtle": "#F8F9FA",
+      "table_header_tint": "#EDF9F7"
+    },
+    "text": {
+      "primary": "#2D3748",
+      "primary_alt": "#333333",
+      "secondary": "#718096",
+      "muted": "#A0AEC0",
+      "on_inverse": "#FFFFFF"
+    },
+    "border": {
+      "subtle": "#E2E8F0",
+      "input": "#E2E8F0",
+      "strong": "#CBD5E0"
+    },
+    "focus": {
+      "ring": "2px solid rgba(40, 180, 164, 0.45)",
+      "offset": "2px"
+    },
+    "status": {
+      "pending": {
+        "background": "#FFF5F5",
+        "text": "#C53030",
+        "border": "transparent or #FED7D7"
+      },
+      "warning": {
+        "background": "#FFFAF0",
+        "text": "#C05621"
+      },
+      "success": {
+        "background": "#F0FFF4",
+        "text": "#276749"
+      },
+      "info_new": {
+        "background": "#FAF5FF",
+        "text": "#6B46C1"
+      },
+      "neutral": {
+        "background": "#EDF2F7",
+        "text": "#4A5568"
+      }
+    },
+    "data_viz": {
+      "donut": ["#3182CE", "#DD6B20", "#E53E3E"],
+      "guidance": "Keep chart colors vivid but professional; never compete with brand teal used for UI chrome."
+    }
+  },
+  "typography": {
+    "font_family": {
+      "sans": "\"Inter\", \"Roboto\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+      "fallback_stack": "Use a geometric neo-grotesk with excellent tabular figures for currency tables."
+    },
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "sizes": {
+      "display_id": {
+        "px": 24,
+        "weight": "bold",
+        "color": "brand.primary",
+        "usage": "Shipment or quotation identifiers in page hero."
+      },
+      "page_title": {
+        "px": 20,
+        "weight": "bold",
+        "color": "text.primary",
+        "usage": "Screen titles such as Quotes List."
+      },
+      "section_title": {
+        "px": 18,
+        "weight": 600,
+        "color": "text.primary",
+        "usage": "Card headers like Shipment Details, Charge Summary."
+      },
+      "body": {
+        "px": 14,
+        "weight": 400,
+        "line_height": 1.5,
+        "color": "text.primary"
+      },
+      "body_strong": {
+        "px": 14,
+        "weight": 600,
+        "color": "text.primary",
+        "usage": "Primary row identifiers (customer name, quote id)."
+      },
+      "label": {
+        "px": 12,
+        "weight": 600,
+        "letter_spacing": "0.02em",
+        "transform": "uppercase optional; if uppercase, increase tracking slightly",
+        "color": "text.secondary",
+        "usage": "Form field labels, table column headers."
+      },
+      "caption": {
+        "px": 11,
+        "weight": 400,
+        "color": "text.muted",
+        "usage": "Updated at, helper text, secondary emails under names."
+      }
+    },
+    "numeric_alignment": "Right-align currency and counts in tables and summaries; keep labels left-aligned."
+  },
+  "elevation": {
+    "card_shadow": "0 4px 20px rgba(15, 23, 42, 0.05)",
+    "card_shadow_alt": "0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04)",
+    "popover_shadow": "0 10px 30px rgba(15, 23, 42, 0.12)",
+    "guidance": "Elevation signals layering (cards over canvas, menus over cards), not decoration."
+  },
+  "radii": {
+    "xs": 4,
+    "sm": 6,
+    "md": 8,
+    "lg": 12,
+    "xl": 16,
+    "pill": 9999
+  },
+  "iconography": {
+    "style": "Outline / linear, 1.5–2px stroke, rounded caps where available.",
+    "library_hint": "Lucide or similar; match stroke weight across sidebar, toolbar, and buttons.",
+    "sizes": {
+      "inline": 16,
+      "nav": 20,
+      "hero": 24
+    },
+    "color": {
+      "default": "text.secondary",
+      "active": "brand.primary",
+      "on_primary_button": "on_primary"
+    }
+  },
+  "motion": {
+    "philosophy": "Barely perceptible: fast fades and 150–200ms ease-out on hovers; no playful bounce.",
+    "reduced_motion": "Respect prefers-reduced-motion; swap motion for instant color/border changes."
+  },
+  "components": {
+    "sidebar_nav_item": {
+      "structure": "Icon + label, left aligned; optional badge at trailing edge.",
+      "inactive": {
+        "background": "transparent",
+        "text": "text.secondary",
+        "icon": "text.secondary"
+      },
+      "active": {
+        "background": "brand.selection_tint",
+        "text": "brand.primary",
+        "icon": "brand.primary",
+        "leading_accent": "4px wide vertical bar in brand.primary flush to left edge of item"
+      },
+      "hover_inactive": {
+        "background": "surface.subtle",
+        "text": "text.primary"
+      },
+      "hit_area": "Minimum 40px height per item; 12–16px horizontal padding inside sidebar."
+    },
+    "top_search": {
+      "shape": "Full pill (radii.pill)",
+      "height_px": 40,
+      "background": "surface.primary",
+      "border": "1px solid border.input",
+      "icon": "leading magnifier in text.muted",
+      "placeholder": "text.muted",
+      "focus": {
+        "border": "brand.primary",
+        "shadow": "subtle outer glow using focus.ring color at low alpha"
+      }
+    },
+    "card": {
+      "background": "surface.primary",
+      "radius": "radii.lg to radii.xl",
+      "border": "1px solid border.subtle optional; prefer border when shadow is omitted",
+      "shadow": "elevation.card_shadow",
+      "padding": "spacing_scale.semantics.card_padding",
+      "header": {
+        "layout": "Title left; primary actions right in a horizontal cluster with 8–12px gaps",
+        "divider": "1px hairline border.subtle below header when body scrolls independently"
+      }
+    },
+    "tabs": {
+      "style": "Pill segmented control for primary modes (e.g., All / Mine / Pending).",
+      "active": {
+        "background": "brand.primary",
+        "text": "on_primary",
+        "badge": "small circular or pill counter on tab in contrasting subtle tint"
+      },
+      "inactive": {
+        "background": "transparent",
+        "text": "text.primary"
+      },
+      "spacing": "8px between tabs; container padding 4–6px internal for segmented feel"
+    },
+    "button_primary": {
+      "shape": "rounded md",
+      "background": "brand.primary",
+      "text": "on_primary",
+      "icon": "leading plus or action icon",
+      "padding": "10px 16px",
+      "hover": "brand.primary_hover",
+      "focus": "focus ring as defined in color.focus"
+    },
+    "button_secondary": {
+      "style": "ghost or subtle gray fill for low-emphasis actions",
+      "text": "text.primary",
+      "hover": "surface.subtle"
+    },
+    "button_outline": {
+      "usage": "Accept / Reply style constructive secondary emphasis",
+      "border": "1px solid brand.primary",
+      "text": "brand.primary",
+      "background": "transparent",
+      "hover": "brand.selection_tint background"
+    },
+    "button_destructive_outline": {
+      "border": "1px solid status.pending.text at ~60% opacity",
+      "text": "status.pending.text",
+      "hover": "status.pending.background"
+    },
+    "input_text": {
+      "height_px": 40,
+      "radius": "radii.md",
+      "border": "1px solid border.input",
+      "padding_x": 12,
+      "label": "typography.sizes.label above field with 6–8px gap",
+      "focus": "same language as top_search"
+    },
+    "select_and_menus": {
+      "trigger": "Compact control with chevron; align dropdown to trigger width or slightly wider for readability.",
+      "menu_surface": "surface.primary with popover_shadow",
+      "item_hover": "surface.subtle"
+    },
+    "badge_tag": {
+      "shape": "radii.xs padding 4px 8px",
+      "typography": "11–12px semibold",
+      "colors": "map to color.status.* backgrounds with matching text",
+      "border": "usually none; optional 1px translucent border for contrast on white"
+    },
+    "avatar": {
+      "shape": "circle",
+      "sizes": {
+        "table": 32,
+        "header": 36
+      },
+      "border": "1px white when overlapping tinted row backgrounds",
+      "fallback": "initials on brand.selection_tint circle"
+    },
+    "table": {
+      "container": "Inside card; edge-to-edge rows with horizontal padding on header cells matching card padding.",
+      "header": {
+        "background": "surface.table_header_tint",
+        "typography": "typography.sizes.label",
+        "text_transform": "uppercase optional"
+      },
+      "row": {
+        "divider": "1px solid border.subtle",
+        "height": "48–56px comfortable",
+        "hover": "surface.subtle at very low contrast"
+      },
+      "row_selected": {
+        "background": "brand.selection_tint",
+        "leading_accent": "3–4px brand.primary vertical bar at row start (align with sidebar active language)"
+      },
+      "cells": {
+        "primary_column": "avatar + stacked name (body_strong) + email (caption)",
+        "numeric_column": "tabular numbers, right aligned"
+      }
+    },
+    "checkbox": {
+      "size": 18,
+      "radius": "radii.sm",
+      "unchecked": "white surface with border.input",
+      "checked": "fill brand.primary; white checkmark icon"
+    },
+    "pagination": {
+      "layout": "Centered or end-aligned under table with 8px gaps",
+      "active_page": "small circular background brand.selection_tint with brand.primary text",
+      "inactive": "text.secondary with subtle hover background"
+    },
+    "toolbar": {
+      "composition": "Left cluster: secondary search scoped to view; middle: filter chips/dropdowns; right: primary CTA",
+      "spacing": "12–16px between clusters; wrap gracefully on narrow widths maintaining CTA visibility"
+    },
+    "stat_block_and_key_value": {
+      "label_value_gap_px": 6,
+      "columns": "Use two-column key/value grids inside cards; align values to baseline; keep label width consistent to avoid ragged scanning"
+    },
+    "charge_summary_list": {
+      "pattern": "Vertical list of line items with hairline separators; labels left, amounts right-aligned in tabular figures; section subtotals in semibold."
+    },
+    "donut_chart": {
+      "stroke": "medium–thick segment stroke; hollow center shows large total in display numeric style",
+      "center_label": "typography.sizes.section_title weight semibold",
+      "legend": "Small color swatches with caption typography to the side or below"
+    },
+    "tooltip": {
+      "usage": "Copy-to-clipboard affordances near IDs",
+      "surface": "#1A202C at 92% opacity",
+      "text": "on_inverse",
+      "radius": "radii.sm",
+      "padding": "6px 8px",
+      "shadow": "elevation.popover_shadow"
+    },
+    "empty_state": {
+      "layout": "Centered in card with illustration optional; title in section_title; body in body text; primary action button"
+    }
+  },
+  "content_patterns": {
+    "page_hero": {
+      "elements": ["Back affordance optional", "Primary identifier (display_id)", "Status badges inline", "Metadata row (caption) for updated timestamps"],
+      "alignment": "Start aligned; keep badge cluster tight with 8px gaps"
+    },
+    "filter_chips": {
+      "style": "Subtle filled pills using surface.subtle with text.secondary; active chip uses selection_tint + primary text"
+    }
+  },
+  "accessibility": {
+    "contrast": "Maintain WCAG AA for normal text on white; status pills may use darker text on pastel fills as shown.",
+    "focus": "Always visible keyboard focus on interactive controls; do not remove outlines without replacement rings.",
+    "targets": "Minimum 40x40px hit targets for nav and icon buttons on touch breakpoints."
+  },
+  "ai_replication_guide": {
+    "step_1": "Set global canvas background to surface.canvas; keep header/sidebar white; use brand.primary only for interactive emphasis.",
+    "step_2": "Establish typography scale with Inter; enforce tabular nums for financial columns.",
+    "step_3": "Build cards with lg radius + soft shadow; separate sections with whitespace before adding borders.",
+    "step_4": "Mirror selection language: pale mint tint + left vertical bar + teal icon/text across sidebar, table rows, and tabs.",
+    "step_5": "Use restrained status palette from color.status; pair hue + text label.",
+    "anti_patterns": [
+      "Heavy drop shadows or skeuomorphic gloss",
+      "Multiple competing accent colors outside data viz",
+      "Ultra-compact tables without hover/readability consideration",
+      "Low-contrast gray text for primary actions or critical numbers"
+    ]
+  }
+}

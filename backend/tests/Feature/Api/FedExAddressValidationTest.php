@@ -155,7 +155,38 @@ class FedExAddressValidationTest extends TestCase
         ]);
 
         $response->assertStatus(502)
-            ->assertJsonStructure(['message']);
+            ->assertJsonPath('fedex_http_status', 500)
+            ->assertJsonStructure(['message', 'fedex_errors']);
+    }
+
+    public function test_validate_address_preserves_fedex_422_response_body(): void
+    {
+        Http::fake([
+            'https://apis-sandbox.fedex.com/oauth/token' => Http::response([
+                'access_token' => 'fake-token',
+                'token_type' => 'bearer',
+                'expires_in' => 3600,
+            ], 200),
+            'https://apis-sandbox.fedex.com/address/v1/addresses/resolve' => Http::response([
+                'errors' => [['code' => 'INVALID.ADDRESS', 'message' => 'Bad payload']],
+            ], 422),
+        ]);
+
+        $user = User::factory()->create(['role' => 'customer']);
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/fedex/validate-address', [
+            'addresses' => [
+                [
+                    'streetLines' => ['x'],
+                    'countryCode' => 'US',
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('fedex_http_status', 422)
+            ->assertJsonStructure(['message', 'fedex_errors']);
     }
 
     public function test_validate_address_returns_502_when_credentials_missing(): void

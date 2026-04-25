@@ -19,12 +19,15 @@ type FetchOptions = {
   method?: string;
   body?: unknown;
   token?: string | null;
+  /** Merged after Accept; Authorization and Content-Type still applied when set below. */
+  headers?: Record<string, string>;
 };
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const url = `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
   const headers: Record<string, string> = {
     Accept: "application/json",
+    ...(options.headers ?? {}),
   };
   if (options.token) {
     headers.Authorization = `Bearer ${options.token}`;
@@ -33,11 +36,25 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
     headers["Content-Type"] = "application/json";
   }
 
-  const res = await fetch(url, {
-    method: options.method ?? "GET",
-    headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: options.method ?? "GET",
+      headers,
+      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (e) {
+    const base = getApiBaseUrl();
+    const isNetworkFail =
+      e instanceof TypeError &&
+      (e.message === "Failed to fetch" || e.message.toLowerCase().includes("fetch"));
+    const message = isNetworkFail
+      ? `Cannot reach API at ${base}. Start the Laravel server and check NEXT_PUBLIC_API_URL (CORS must allow this origin).`
+      : e instanceof Error
+        ? e.message
+        : "Network request failed.";
+    throw new ApiError(message, 0, { networkError: true, url, cause: String(e) });
+  }
 
   const text = await res.text();
   let parsed: unknown = null;
